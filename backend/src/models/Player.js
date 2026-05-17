@@ -36,7 +36,10 @@ const playerSchema = new mongoose.Schema({
         name: String,
         count: Number
     }],
-    lastPlayedAt: Date
+    lastPlayedAt: {
+        type: Date,
+        default: null
+    }
 }, {
     timestamps: true
 });
