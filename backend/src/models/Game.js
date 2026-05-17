@@ -4,8 +4,7 @@ const gameSchema = new mongoose.Schema({
     gameId: {
         type: String,
         required: true,
-        unique: true,
-        index: true
+        unique: true
     },
     rated: {
         type: Boolean,
@@ -38,11 +37,11 @@ const gameSchema = new mongoose.Schema({
         required: true
     },
     white: {
-        username: { type: String, required: true, index: true },
+        username: { type: String, required: true },
         rating: { type: Number, required: true }
     },
     black: {
-        username: { type: String, required: true, index: true },
+        username: { type: String, required: true },
         rating: { type: Number, required: true }
     },
     moves: {
@@ -50,8 +49,8 @@ const gameSchema = new mongoose.Schema({
         required: true
     },
     opening: {
-        eco: { type: String, index: true },
-        name: { type: String, index: true },
+        eco: { type: String },
+        name: { type: String },
         ply: { type: Number }
     },
     isArchived: {
@@ -62,7 +61,8 @@ const gameSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Create indexes for better query performance
+// Create indexes for better query performance (only here, not in schema)
+gameSchema.index({ gameId: 1 }, { unique: true });
 gameSchema.index({ "white.username": 1 });
 gameSchema.index({ "black.username": 1 });
 gameSchema.index({ winner: 1 });
