@@ -191,3 +191,124 @@ router.patch("/:matchId/restore", async (req, res) => {
 });
 
 module.exports = router;
+// Add after existing routes:
+
+// GET /api/v1/matches/:matchId/pgn - Fetch PGN notation
+router.get("/:matchId/pgn", async (req, res) => {
+    try {
+        const game = await Game.findOne({ gameId: req.params.matchId });
+        if (!game) {
+            return res.status(404).json({ success: false, message: "Game not found" });
+        }
+        
+        // Format PGN
+        const pgn = `[Event "Chess Game"]\n[Site "Chess Platform"]\n[Date "${game.createdAt.toISOString().split('T')[0]}"]\n[White "${game.white.username}"]\n[Black "${game.black.username}"]\n[Result "${game.winner === "white" ? "1-0" : game.winner === "black" ? "0-1" : "1/2-1/2"}"]\n[WhiteElo "${game.white.rating}"]\n[BlackElo "${game.black.rating}"]\n[TimeControl "${game.incrementCode}"]\n\n${game.moves}`;
+        
+        res.json({ success: true, pgn });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET /api/v1/matches/random - Fetch random match
+router.get("/random/game", async (req, res) => {
+    try {
+        const count = await Game.countDocuments({ isArchived: false });
+        const random = Math.floor(Math.random() * count);
+        const game = await Game.findOne({ isArchived: false }).skip(random);
+        
+        res.json({ success: true, data: game });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET /api/v1/matches/filter/rated - Filter rated matches
+router.get("/filter/rated", async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        
+        const games = await Game.find({ rated: true, isArchived: false })
+            .skip(skip)
+            .limit(limit);
+        const total = await Game.countDocuments({ rated: true, isArchived: false });
+        
+        res.json({ success: true, count: games.length, total, page, pages: Math.ceil(total / limit), data: games });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET /api/v1/matches/filter/unrated
+router.get("/filter/unrated", async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        
+        const games = await Game.find({ rated: false, isArchived: false })
+            .skip(skip)
+            .limit(limit);
+        const total = await Game.countDocuments({ rated: false, isArchived: false });
+        
+        res.json({ success: true, count: games.length, total, page, pages: Math.ceil(total / limit), data: games });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET /api/v1/matches/filter/white-wins
+router.get("/filter/white-wins", async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        
+        const games = await Game.find({ winner: "white", isArchived: false })
+            .skip(skip)
+            .limit(limit);
+        const total = await Game.countDocuments({ winner: "white", isArchived: false });
+        
+        res.json({ success: true, count: games.length, total, page, pages: Math.ceil(total / limit), data: games });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET /api/v1/matches/filter/black-wins
+router.get("/filter/black-wins", async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        
+        const games = await Game.find({ winner: "black", isArchived: false })
+            .skip(skip)
+            .limit(limit);
+        const total = await Game.countDocuments({ winner: "black", isArchived: false });
+        
+        res.json({ success: true, count: games.length, total, page, pages: Math.ceil(total / limit), data: games });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// GET /api/v1/matches/filter/draws
+router.get("/filter/draws", async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        
+        const games = await Game.find({ winner: "draw", isArchived: false })
+            .skip(skip)
+            .limit(limit);
+        const total = await Game.countDocuments({ winner: "draw", isArchived: false });
+        
+        res.json({ success: true, count: games.length, total, page, pages: Math.ceil(total / limit), data: games });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
