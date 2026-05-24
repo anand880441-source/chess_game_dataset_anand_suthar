@@ -26,12 +26,14 @@ const gameRoutes = require("./src/routes/gameRoutes");
 const playerRoutes = require("./src/routes/playerRoutes");
 const openingRoutes = require("./src/routes/openingRoutes");
 const searchRoutes = require("./src/routes/searchRoutes");
+const analyticsRoutes = require("./src/routes/analyticsRoutes");
 
 // Use routes
 app.use("/api/v1/matches", gameRoutes);
 app.use("/api/v1/players", playerRoutes);
 app.use("/api/v1/openings", openingRoutes);
 app.use("/api/v1/search", searchRoutes);
+app.use("/api/v1", analyticsRoutes);
 
 console.log("✅ Routes registered:");
 console.log("   - GET  /api/v1/health");
