@@ -24,10 +24,12 @@ app.get("/api/v1/health", (req, res) => {
 // Import routes
 const gameRoutes = require("./src/routes/gameRoutes");
 const playerRoutes = require("./src/routes/playerRoutes");
+const openingRoutes = require("./src/routes/openingRoutes");
 
 // Use routes
 app.use("/api/v1/matches", gameRoutes);
 app.use("/api/v1/players", playerRoutes);
+app.use("/api/v1/openings", openingRoutes);
 
 console.log("✅ Routes registered:");
 console.log("   - GET  /api/v1/health");
@@ -42,6 +44,11 @@ console.log("   - GET  /api/v1/players/:username");
 console.log("   - GET  /api/v1/players/:username/stats");
 console.log("   - GET  /api/v1/players/top-rated");
 console.log("   - GET  /api/v1/players/compare/:p1/:p2");
+console.log("   - GET  /api/v1/openings");
+console.log("   - GET  /api/v1/openings/popular");
+console.log("   - GET  /api/v1/openings/eco/:ecoCode");
+console.log("   - GET  /api/v1/openings/search");
+console.log("   - GET  /api/v1/openings/win-rates");
 
 // Root route
 app.get("/", (req, res) => {
@@ -59,7 +66,12 @@ app.get("/", (req, res) => {
             player: "GET /api/v1/players/:username",
             playerStats: "GET /api/v1/players/:username/stats",
             topRated: "GET /api/v1/players/top-rated",
-            compare: "GET /api/v1/players/compare/:player1/:player2"
+            compare: "GET /api/v1/players/compare/:player1/:player2",
+            openings: "GET /api/v1/openings",
+            popularOpenings: "GET /api/v1/openings/popular",
+            openingByEco: "GET /api/v1/openings/eco/:ecoCode",
+            searchOpenings: "GET /api/v1/openings/search",
+            openingWinRates: "GET /api/v1/openings/win-rates"
         }
     });
 });
