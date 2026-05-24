@@ -21,16 +21,27 @@ app.get("/api/v1/health", (req, res) => {
     });
 });
 
-// Import and use game routes
+// Import routes
 const gameRoutes = require("./src/routes/gameRoutes");
+const playerRoutes = require("./src/routes/playerRoutes");
+
+// Use routes
 app.use("/api/v1/matches", gameRoutes);
+app.use("/api/v1/players", playerRoutes);
 
 console.log("✅ Routes registered:");
+console.log("   - GET  /api/v1/health");
 console.log("   - GET  /api/v1/matches");
-console.log("   - GET  /api/v1/matches/test");
 console.log("   - GET  /api/v1/matches/:matchId");
 console.log("   - GET  /api/v1/matches/:matchId/moves");
-console.log("   - GET  /api/v1/matches/latest/list");
+console.log("   - GET  /api/v1/matches/:matchId/pgn");
+console.log("   - GET  /api/v1/matches/random/game");
+console.log("   - GET  /api/v1/matches/filter/*");
+console.log("   - GET  /api/v1/players");
+console.log("   - GET  /api/v1/players/:username");
+console.log("   - GET  /api/v1/players/:username/stats");
+console.log("   - GET  /api/v1/players/top-rated");
+console.log("   - GET  /api/v1/players/compare/:p1/:p2");
 
 // Root route
 app.get("/", (req, res) => {
@@ -40,10 +51,15 @@ app.get("/", (req, res) => {
         endpoints: {
             health: "GET /api/v1/health",
             matches: "GET /api/v1/matches",
-            test: "GET /api/v1/matches/test",
             match: "GET /api/v1/matches/:matchId",
             moves: "GET /api/v1/matches/:matchId/moves",
-            latest: "GET /api/v1/matches/latest/list"
+            pgn: "GET /api/v1/matches/:matchId/pgn",
+            random: "GET /api/v1/matches/random/game",
+            players: "GET /api/v1/players",
+            player: "GET /api/v1/players/:username",
+            playerStats: "GET /api/v1/players/:username/stats",
+            topRated: "GET /api/v1/players/top-rated",
+            compare: "GET /api/v1/players/compare/:player1/:player2"
         }
     });
 });
