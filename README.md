@@ -1,257 +1,406 @@
-# ♟️ Chess Game Dataset & Analytics API
+# <div align="center"><img src="https://res.cloudinary.com/dpvmzqfvv/image/upload/v1779780443/download_5_nhy4fz.jpg" alt="Chess Match Analytics Banner" width="100%" /></div>
 
-An advanced, high-performance Node.js & Express backend for importing, analyzing, and querying chess match datasets. It provides rich endpoints for match statistics, player comparisons, opening analysis, fuzzy search, user authentication, and system administration.
+<div align="center">
 
----
+[![Node.js Version](https://img.shields.io/badge/Node.js-22.x-green.svg?style=flat-square)](https://nodejs.org/)
+[![Express.js Version](https://img.shields.io/badge/Express.js-5.x-blue.svg?style=flat-square)](https://expressjs.com/)
+[![MongoDB Atlas](https://img.shields.io/badge/MongoDB-Atlas-brightgreen.svg?style=flat-square)](https://www.mongodb.com/cloud/atlas)
+[![Render](https://img.shields.io/badge/Deployed-Render-purple.svg?style=flat-square)](https://render.com)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
-## 🚀 Features
-
-- **Data Seeding pipeline**: Imports raw JSON chess match datasets, handles deduplication, resolves timestamp values safely, and seeds MongoDB with collections for Matches, Players, and Openings.
-- **Robust Authentication**: Secure registration, login, profile management, and role-based access control (RBAC) with JWT (JSON Web Tokens).
-- **Match Queries & PGN Exports**: Pagination, advanced sorting/filtering, and dynamic generation of Standard Chess PGN format text.
-- **Opening Analysis**: Win-rate tracking, category grouping (Aggressive, Gambit, Defensive, etc.), and complexity filtering.
-- **Deep Analytics Engine**: Victory distributions, color advantages, time-control habits, checkmate ratios, and average turn count analysis.
-- **Fuzzy Search & Autocomplete**: Custom regex-based and auto-complete routes for fast player, match, and opening lookups.
+</div>
 
 ---
 
-## 🛠️ Technology Stack
+## 📖 Overview
 
-- **Runtime Environment**: Node.js (v16+)
-- **Framework**: Express.js (v5)
-- **Database**: MongoDB Atlas (via Mongoose v9)
-- **Security**: JWT (jsonwebtoken), Password hashing (bcryptjs)
-- **Validation**: express-validator
-- **Tooling**: Nodemon (development)
+A **production-ready REST API** for chess match analytics, player statistics, opening theory, and game analysis. Built with Node.js, Express, MongoDB Atlas, and JWT authentication.
+
+### 🎯 Key Features
+
+| Category | Description |
+| :--- | :--- |
+| ♟️ **Match Management** | Complete CRUD operations, PGN/FEN export, random match, filtering |
+| 👥 **Player Analytics** | Stats, rating history, win/loss/draw rates, player comparison |
+| 📚 **Opening Database** | 365+ openings with ECO codes, win rates, complexity levels |
+| 🔍 **Advanced Search** | Full-text search, autocomplete, ECO code search, rating filters |
+| 📊 **Analytics Engine** | Victory distribution, color advantage, checkmate frequency |
+| 🔐 **Authentication** | JWT-based auth with bcrypt password hashing |
+| 👑 **Admin Panel** | User management, system health monitoring |
 
 ---
 
-## 📁 Directory Structure
+## 📊 Database Statistics
+
+<div align="center">
+  <table style="width: 100%; border: none; text-align: center; border-collapse: separate; border-spacing: 12px;">
+    <tr>
+      <td style="background: #1e293b; color: #fff; padding: 20px; border-radius: 12px; width: 20%;">
+        <span style="font-size: 2em; font-weight: bold; color: #38bdf8;">19,113</span><br/>
+        <strong style="color: #94a3b8; text-transform: uppercase; font-size: 0.75em; letter-spacing: 1px;">Total Games</strong>
+      </td>
+      <td style="background: #1e293b; color: #fff; padding: 20px; border-radius: 12px; width: 20%;">
+        <span style="font-size: 2em; font-weight: bold; color: #818cf8;">15,635</span><br/>
+        <strong style="color: #94a3b8; text-transform: uppercase; font-size: 0.75em; letter-spacing: 1px;">Total Players</strong>
+      </td>
+      <td style="background: #1e293b; color: #fff; padding: 20px; border-radius: 12px; width: 20%;">
+        <span style="font-size: 2em; font-weight: bold; color: #a78bfa;">365</span><br/>
+        <strong style="color: #94a3b8; text-transform: uppercase; font-size: 0.75em; letter-spacing: 1px;">Total Openings</strong>
+      </td>
+      <td style="background: #1e293b; color: #fff; padding: 20px; border-radius: 12px; width: 20%;">
+        <span style="font-size: 2em; font-weight: bold; color: #f43f5e;">60.5</span><br/>
+        <strong style="color: #94a3b8; text-transform: uppercase; font-size: 0.75em; letter-spacing: 1px;">Average Turns</strong>
+      </td>
+      <td style="background: #1e293b; color: #fff; padding: 20px; border-radius: 12px; width: 20%;">
+        <span style="font-size: 2em; font-weight: bold; color: #10b981;">31.26%</span><br/>
+        <strong style="color: #94a3b8; text-transform: uppercase; font-size: 0.75em; letter-spacing: 1px;">Checkmate Rate</strong>
+      </td>
+    </tr>
+  </table>
+</div>
+
+---
+
+## 🎨 System Flow & ER Diagram
+
+```mermaid
+graph TD
+    classDef border fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff;
+    classDef db fill:#0f172a,stroke:#10b981,stroke-width:2px,color:#fff;
+
+    A[Client Request] --> B[authMiddleware]:::border
+    B --> C[Express Router]:::border
+    C --> D[Controllers Layer]:::border
+    D --> E[Mongoose Schema Models]:::border
+    E --> F[(MongoDB Atlas)]:::db
+```
+
+```mermaid
+erDiagram
+    GAME {
+        string gameId PK
+        boolean rated
+        date createdAt
+        number turns
+        string victoryStatus
+        string winner
+        string moves
+    }
+    PLAYER {
+        string username PK
+        number totalGames
+        number wins
+        number losses
+        number draws
+        number currentRating
+    }
+    OPENING {
+        string eco PK
+        string name
+        number totalGames
+        number whiteWins
+        number blackWins
+    }
+    USER {
+        string name
+        string email PK
+        string password
+        string role
+        boolean isActive
+    }
+
+    PLAYER ||--o{ GAME : "plays"
+    OPENING ||--o{ GAME : "uses"
+```
+
+---
+
+## 🚀 Live API
+
+| Environment | URL |
+| :--- | :--- |
+| **Production** | [https://chess-match-analytics-api.onrender.com](https://chess-match-analytics-api.onrender.com) |
+| **API Base** | [https://chess-match-analytics-api.onrender.com/api/v1](https://chess-match-analytics-api.onrender.com/api/v1) |
+| **Health Check** | [https://chess-match-analytics-api.onrender.com/api/v1/health](https://chess-match-analytics-api.onrender.com/api/v1/health) |
+| **Postman Docs** | [View Documentation](https://documenter.getpostman.com/view/50840839/2sBXwmQCzf) |
+
+---
+
+## 📁 Project Structure
 
 ```text
+chess_game_dataset_anand_suthar/
 ├── backend/
-│   ├── data/
-│   │   └── chess_games.json       # Source JSON dataset for seeding
 │   ├── src/
 │   │   ├── config/
-│   │   │   └── database.js        # MongoDB connection configuration
+│   │   │   └── database.js         # MongoDB connection
 │   │   ├── controllers/
-│   │   │   ├── adminController.js # Users & system administration
-│   │   │   ├── analyticsController.js # Match stat distribution & trends
-│   │   │   ├── authController.js  # Registration, login, profile
-│   │   │   ├── gameController.js  # Matches CRUD & filters
-│   │   │   ├── openingController.js # Opening categories & success rates
-│   │   │   ├── playerController.js # Leaderboards & player stats
-│   │   │   └── searchController.js # Fuzzy search & autocomplete
+│   │   │   ├── gameController.js   # Match operations
+│   │   │   ├── playerController.js # Player analytics
+│   │   │   ├── openingController.js # Opening database
+│   │   │   ├── searchController.js  # Search endpoints
+│   │   │   ├── analyticsController.js # Stats & analytics
+│   │   │   ├── authController.js   # JWT authentication
+│   │   │   └── adminController.js  # Admin routes
 │   │   ├── middleware/
-│   │   │   └── authMiddleware.js  # JWT validation & RBAC (Admin/User)
+│   │   │   └── authMiddleware.js   # JWT verification
 │   │   ├── models/
-│   │   │   ├── Game.js            # Chess game schema
-│   │   │   ├── Opening.js         # Chess opening schema
-│   │   │   ├── Player.js          # Player performance schema
-│   │   │   └── User.js            # User authentication schema
-│   │   ├── routes/
-│   │   │   ├── adminRoutes.js
-│   │   │   ├── analyticsRoutes.js
-│   │   │   ├── authRoutes.js
-│   │   │   ├── gameRoutes.js
-│   │   │   ├── openingRoutes.js
-│   │   │   ├── playerRoutes.js
-│   │   │   └── searchRoutes.js
-│   │   └── utils/
-│   ├── .env                       # Environment configurations
-│   ├── app.js                     # Express app setup & middleware
-│   ├── index.js                   # Server entry point
-│   └── seed.js                    # Bulk seeder CLI script
-└── README.md                      # Root documentation (this file)
+│   │   │   ├── Game.js             # Match schema
+│   │   │   ├── Player.js           # Player schema
+│   │   │   ├── Opening.js          # Opening schema
+│   │   │   └── User.js             # User schema
+│   │   └── routes/
+│   │       ├── gameRoutes.js
+│   │       ├── playerRoutes.js
+│   │       ├── openingRoutes.js
+│   │       ├── searchRoutes.js
+│   │       ├── analyticsRoutes.js
+│   │       ├── authRoutes.js
+│   │       └── adminRoutes.js
+│   ├── .env                        # Environment variables
+│   ├── .gitignore
+│   ├── app.js                      # Express app
+│   ├── index.js                    # Server entry
+│   ├── package.json
+│   ├── seed.js                     # Database seeding script
+│   └── verify-seed.js              # Data verification
+├── data/                           # JSON dataset (gitignored)
+└── README.md
 ```
 
 ---
 
-## ⚙️ Installation & Setup
+## 🛠️ Tech Stack
 
-### 1. Prerequisites
-- **Node.js** installed on your machine.
-- **MongoDB Atlas** database URI connection string.
+| Technology | Purpose |
+| :--- | :--- |
+| [Node.js](https://nodejs.org/) | JavaScript runtime |
+| [Express.js](https://expressjs.com/) | Web framework |
+| [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) | Cloud database |
+| [Mongoose](https://mongoosejs.com/) | ODM for MongoDB |
+| [JWT](https://jwt.io/) | Authentication |
+| [bcryptjs](https://www.npmjs.com/package/bcryptjs) | Password hashing |
+| [CORS](https://www.npmjs.com/package/cors) | Cross-origin support |
+| [dotenv](https://www.npmjs.com/package/dotenv) | Environment variables |
 
-### 2. Install Dependencies
-Navigate into the `backend` folder and install NPM packages:
+---
+
+## 📡 API Endpoints (80+)
+
+### 🏥 Health & System
+
+| Method | Endpoint | Description |
+| :---: | :--- | :--- |
+| `GET` | `/api/v1/health` | Server health check |
+| `GET` | `/api/v1/admin/system/info` | System information |
+| `GET` | `/api/v1/admin/system/status` | Service status |
+
+### 🔐 Authentication
+
+| Method | Endpoint | Description |
+| :---: | :--- | :--- |
+| `POST` | `/api/v1/auth/register` | Create new user |
+| `POST` | `/api/v1/auth/login` | Login & get JWT |
+| `GET` | `/api/v1/auth/profile` | Get user profile |
+| `PATCH` | `/api/v1/auth/profile` | Update profile |
+| `DELETE` | `/api/v1/auth/profile` | Delete account |
+
+### ♟️ Match Management
+
+| Method | Endpoint | Description |
+| :---: | :--- | :--- |
+| `GET` | `/api/v1/matches` | List all matches (paginated) |
+| `GET` | `/api/v1/matches/:matchId` | Get match details |
+| `GET` | `/api/v1/matches/:matchId/moves` | Get move sequence |
+| `GET` | `/api/v1/matches/:matchId/pgn` | Get PGN notation |
+| `GET` | `/api/v1/matches/latest/list` | Latest matches |
+| `GET` | `/api/v1/matches/trending/list` | Trending matches |
+| `GET` | `/api/v1/matches/random/game` | Random match |
+| `GET` | `/api/v1/matches/filter/rated` | Rated matches |
+| `GET` | `/api/v1/matches/filter/white-wins` | White victories |
+
+### 👥 Player Routes
+
+| Method | Endpoint | Description |
+| :---: | :--- | :--- |
+| `GET` | `/api/v1/players` | List all players |
+| `GET` | `/api/v1/players/:username` | Player details |
+| `GET` | `/api/v1/players/:username/stats` | Player statistics |
+| `GET` | `/api/v1/players/:username/history` | Match history |
+| `GET` | `/api/v1/players/top-rated` | Highest rated |
+| `GET` | `/api/v1/players/top-active` | Most active |
+| `GET` | `/api/v1/players/compare/:p1/:p2` | Compare players |
+
+### 📚 Opening Routes
+
+| Method | Endpoint | Description |
+| :---: | :--- | :--- |
+| `GET` | `/api/v1/openings` | List all openings |
+| `GET` | `/api/v1/openings/popular` | Most played |
+| `GET` | `/api/v1/openings/eco/:ecoCode` | Get by ECO code |
+| `GET` | `/api/v1/openings/search` | Search openings |
+| `GET` | `/api/v1/openings/win-rates` | Win rate statistics |
+
+### 🔍 Search Routes
+
+| Method | Endpoint | Description |
+| :---: | :--- | :--- |
+| `GET` | `/api/v1/search/matches` | Search matches |
+| `GET` | `/api/v1/search/players` | Search players |
+| `GET` | `/api/v1/search/openings` | Search openings |
+| `GET` | `/api/v1/search/eco` | Search by ECO |
+| `GET` | `/api/v1/search/autocomplete` | Autocomplete suggestions |
+| `GET` | `/api/v1/search/player-rating` | Filter by rating |
+
+### 📊 Analytics
+
+| Method | Endpoint | Description |
+| :---: | :--- | :--- |
+| `GET` | `/api/v1/victory-distribution` | Win/loss/draw stats |
+| `GET` | `/api/v1/color-advantage` | White vs Black |
+| `GET` | `/api/v1/turn-count-average` | Average moves |
+| `GET` | `/api/v1/checkmate-frequency` | Checkmate rate |
+| `GET` | `/api/v1/stats/total-matches` | Total games |
+| `GET` | `/api/v1/stats/total-players` | Total players |
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- MongoDB Atlas account (or local MongoDB)
+- npm or yarn
+
+### Installation
+
 ```bash
-cd backend
+# Clone the repository
+git clone https://github.com/anand880441-source/chess_game_dataset_anand_suthar.git
+
+# Navigate to backend folder
+cd chess_game_dataset_anand_suthar/backend
+
+# Install dependencies
 npm install
+
+# Create .env file
+cp .env.example .env  # or create manually
 ```
 
-### 3. Environment Configuration
-Create a `.env` file in the `backend/` directory with the following variables:
+### Environment Variables
+Create a `.env` file in the `backend/` folder:
+
 ```env
 PORT=5000
-MONGODB_URI=your_mongodb_atlas_connection_string
-JWT_SECRET=your_super_secret_key_change_this
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/chess_analytics
+JWT_SECRET=your_super_secret_jwt_key_here
 JWT_EXPIRE=30d
 NODE_ENV=development
 ```
 
-### 4. Seed the Database
-Make sure you have a `chess_games.json` file inside `backend/data/` containing the chess match records, then run the bulk seeder script:
+### Database Seeding
+
 ```bash
+# Place your chess dataset JSON file in backend/data/chess_games.json
+
+# Run seed script
 node seed.js
-```
-*Note: The seeder clears existing matches, player metrics, and opening rates, then performs batch insertions with validation and deduplication.*
 
-### 5. Run the Server
-**Development Mode (with auto-reload):**
+# Verify data imported
+node verify-seed.js
+```
+
+### Run Server
+
 ```bash
+# Development mode (with auto-reload)
 npm run dev
-```
 
-**Production Mode:**
-```bash
+# Production mode
 npm start
 ```
+Server will start at: http://localhost:5000
 
 ---
 
-## 🗄️ Database Schemas
+## 🧪 Testing
 
-### 🎮 Game Schema (`Game.js`)
-Tracks individual chess matches.
-- `gameId` (String, Unique): ID of the match.
-- `rated` (Boolean): Rated vs. casual game.
-- `createdAt` / `lastMoveAt` (Date): Timestamps.
-- `turns` (Number): Total moves played.
-- `victoryStatus` (String): `outoftime`, `resign`, `mate`, `draw`.
-- `winner` (String): `white`, `black`, `draw`.
-- `incrementCode` (String): Time control configuration.
-- `white` / `black`: `{ username, rating }`.
-- `moves` (String): Full notation list.
-- `opening`: `{ eco, name, ply }`.
-- `isArchived` (Boolean): Status indicator for soft deletes.
+### Test with cURL
 
-### 👤 Player Schema (`Player.js`)
-Aggregated statistics for unique chess usernames.
-- `username` (String, Unique): Chess handle.
-- `totalGames` (Number): Matches played.
-- `wins` / `losses` / `draws` (Number): Outcome counts.
-- `currentRating` (Number): Latest rating.
-- `ratingHistory` (Array): Rating evolution tracks.
-- `openingsUsed`: List of `{ eco, name, count }`.
-- `lastPlayedAt` (Date): Latest game timestamp.
-- **Virtual Fields**: `winRate`, `lossRate`, `drawRate` (calculated dynamically).
+```bash
+# Health check
+curl https://chess-match-analytics-api.onrender.com/api/v1/health
 
-### 📖 Opening Schema (`Opening.js`)
-Global statistics for chess openings.
-- `eco` (String, Unique): Encyclopedia of Chess Openings code.
-- `name` (String): Opening name.
-- `totalGames` / `whiteWins` / `blackWins` / `draws` (Number): Results distribution.
-- `averageTurns` (Number): Typical length of games using this opening.
-- `complexity` (String): `Beginner`, `Intermediate`, `Advanced`, `Master`.
-- `category` (String): `Aggressive`, `Defensive`, `Gambit`, `Positional`, `Balanced`.
-- **Virtual Fields**: `whiteWinRate`, `blackWinRate`.
+# Get matches
+curl "https://chess-match-analytics-api.onrender.com/api/v1/matches?page=1&limit=5"
+
+# Get player stats
+curl https://chess-match-analytics-api.onrender.com/api/v1/players/bourgris/stats
+```
+
+### Test with Postman
+Import the Postman collection from the documentation link or use the provided JSON.
 
 ---
 
-## 🔌 API Endpoints Reference
+## 📈 Performance Optimizations
 
-Base URL: `http://localhost:5000`
+| Optimization | Implementation |
+| :--- | :--- |
+| **Database Indexes** | Indexed on `gameId`, `username`, `winner`, `createdAt`, `turns` |
+| **Pagination** | All list endpoints support `page` and `limit` |
+| **Query Filtering** | Dynamic filters for `winner`, `rating`, `victory status` |
+| **Aggregation Pipeline** | Analytics using MongoDB aggregation framework |
+| **Batch Processing** | Bulk inserts for seeding (1000 documents per batch) |
 
-### 🏥 Health & System Check
-- `GET /api/v1/health` - Check backend server availability.
+---
 
-### 🔑 Authentication (`/api/v1/auth`)
-| Method | Endpoint | Description | Auth Required |
-| :--- | :--- | :--- | :--- |
-| **POST** | `/register` | Register a new user (`name`, `email`, `password`) | Public |
-| **POST** | `/login` | Log in and receive a JWT token (`email`, `password`) | Public |
-| **POST** | `/logout` | Log out the user | Public |
-| **GET** | `/profile` | Get current user's profile | Bearer Token |
-| **PATCH** | `/profile` | Update current user's details | Bearer Token |
-| **DELETE**| `/profile` | Delete current user's account | Bearer Token |
+## 🔒 Security Features
 
-### 🎮 Matches & Games (`/api/v1/matches`)
-| Method | Endpoint | Description | Parameters |
-| :--- | :--- | :--- | :--- |
-| **GET** | `/` | Get all matches (paginated, filterable) | `page`, `limit`, `winner`, `rated`, `victoryStatus`, `sort` |
-| **GET** | `/:matchId` | Get detailed information for a single match | `matchId` |
-| **GET** | `/:matchId/moves` | Get only the moves list and turns | `matchId` |
-| **GET** | `/:matchId/pgn` | Export match details in standard PGN text format | `matchId` |
-| **GET** | `/random/game` | Fetch a random active match | None |
-| **GET** | `/latest/list` | Get latest chess matches | `limit` (default: 10) |
-| **GET** | `/trending/list` | Get matches with the highest turn counts | `limit` (default: 10) |
-| **POST** | `/` | Create a new match record | JSON Request Body |
-| **PUT** | `/:matchId` | Update a match record | `matchId` + Body |
-| **DELETE**| `/:matchId` | Delete a match record | `matchId` |
-| **PATCH** | `/:matchId/archive` | Archive match (soft-delete) | `matchId` |
-| **PATCH** | `/:matchId/restore` | Restore archived match | `matchId` |
-| **GET** | `/filter/rated` | Get only rated matches | `page`, `limit` |
-| **GET** | `/filter/unrated`| Get only unrated matches | `page`, `limit` |
-| **GET** | `/filter/white-wins`| Filter by matches won by white | `page`, `limit` |
-| **GET** | `/filter/black-wins`| Filter by matches won by black | `page`, `limit` |
-| **GET** | `/filter/draws` | Filter by drawn matches | `page`, `limit` |
+- [x] JWT-based authentication
+- [x] bcrypt password hashing (10 salt rounds)
+- [x] Protected routes with middleware
+- [x] Role-based access control (user/admin)
+- [x] Environment variables for secrets
+- [x] CORS enabled for cross-origin requests
 
-### 👤 Player Statistics (`/api/v1/players`)
-| Method | Endpoint | Description | Parameters |
-| :--- | :--- | :--- | :--- |
-| **GET** | `/` | Get list of all players (paginated) | None |
-| **GET** | `/top-rated` | Get highest rated players | None |
-| **GET** | `/top-active` | Get players with the most games played | None |
-| **GET** | `/top-winning` | Get players with the highest win counts | None |
-| **GET** | `/rating-range` | Filter players within a rating boundary | `min`, `max` |
-| **GET** | `/compare/:player1/:player2` | Compare stats side-by-side between two players | `player1`, `player2` |
-| **GET** | `/:username` | Find a single player profile by username | `username` |
-| **GET** | `/:username/history`| Fetch full match history of a player | `username` |
-| **GET** | `/:username/stats`| Get game rates, ratings, and stats | `username` |
-| **GET** | `/:username/openings`| Get list of openings used by this player | `username` |
-| **GET** | `/:username/win-rate`| Fetch calculated win rate for a player | `username` |
-| **GET** | `/:username/recent`| Fetch recent matches played by username | `username` |
+---
 
-### 📖 Chess Openings (`/api/v1/openings`)
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| **GET** | `/` | Retrieve all registered chess openings |
-| **GET** | `/popular` | Top opening strategies by total games played |
-| **GET** | `/trending` | Chess openings with rising usage |
-| **GET** | `/search` | Search openings by keyword name or description |
-| **GET** | `/win-rates` | Retrieve openings sorted by highest win rate |
-| **GET** | `/aggressive` | Openings classified as aggressive |
-| **GET** | `/defensive` | Openings classified as defensive |
-| **GET** | `/gambits` | Openings classified as gambits |
-| **GET** | `/complexity` | Filter openings by complexity (`Beginner`, `Intermediate`, `Advanced`) |
-| **GET** | `/beginner-friendly`| Find low complexity, high win-rate openings |
-| **GET** | `/white-advantage` | Openings showing highest win rate for white |
-| **GET** | `/rare` | Openings with very low total games played |
-| **GET** | `/eco/:ecoCode` | Retrieve info about a specific opening by ECO code |
+## 🧑💻 Developer
 
-### 🔍 Advanced Search Engine (`/api/v1/search`)
-- `GET /api/v1/search/matches` - Detailed filters for matches.
-- `GET /api/v1/search/players` - Search player base using prefix/queries.
-- `GET /api/v1/search/openings` - Query openings list by keyword.
-- `GET /api/v1/search/eco` - Search by ECO code prefix.
-- `GET /api/v1/search/moves` - Search games containing specific move chains.
-- `GET /api/v1/search/fuzzy` - Fuzzy matching on username names, openings, or outcomes.
-- `GET /api/v1/search/autocomplete` - Returns matching lists for active typing UI.
-- `GET /api/v1/search/player-rating` - Search for games in rating range.
-- `GET /api/v1/search/date-range` - Find games played between timestamp limits.
+| Name | GitHub |
+| :--- | :--- |
+| Anand Suthar | [@anand880441-source](https://github.com/anand880441-source) |
 
-### 📊 Deep Analytics (`/api/v1`)
-- `GET /api/v1/victory-distribution` - Percentage breakdown of `resign`, `mate`, `draw`, `outoftime`.
-- `GET /api/v1/color-advantage` - Compare white wins, black wins, and draw rates.
-- `GET /api/v1/turn-count-average` - System-wide average turn count.
-- `GET /api/v1/rated-vs-casual` - Ratio of rated matches to casual matches.
-- `GET /api/v1/time-control-usage` - Usage counts of various time increment codes.
-- `GET /api/v1/shortest-games` - Retrieve top shortest resolved games.
-- `GET /api/v1/longest-games` - Retrieve top longest resolved games.
-- `GET /api/v1/checkmate-frequency` - Percentage of games ended with checkmate (`mate`).
-- `GET /api/v1/draw-frequency` - Stats on types of drawn games.
-- `GET /api/v1/opening-success` - Cross-referenced list of win rates for openings.
-- `GET /api/v1/stats/total-matches` - Overall counter for all records.
-- `GET /api/v1/stats/total-players` - Total player count.
-- `GET /api/v1/stats/average-rating` - System-wide average Elo rating.
+---
 
-### 🛠️ Administration & Management (`/api/v1/admin`)
-*Note: Admin privileges are checked through headers containing a valid admin JWT.*
-- `GET /api/v1/admin/users` - List all registered user accounts (Admin).
-- `PATCH /api/v1/admin/users/:id/ban` - Restrict user access by ID (Admin).
-- `PATCH /api/v1/admin/users/:id/unban` - Reinstate user access by ID (Admin).
-- `GET /api/v1/admin/system/health` - Live memory/CPU health diagnostics (Admin).
-- `GET /api/v1/admin/system/info` - Public server host info.
-- `GET /api/v1/admin/system/status` - Live uptime status.
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+This project is part of the CGxSU Semester 1 Assignment - Full Stack Project (80 Marks).
+
+---
+
+## 🙏 Acknowledgments
+
+- Dataset provided by CGxSU
+- MongoDB Atlas for cloud database hosting
+- Render for free API deployment
+
+---
+
+## 📞 Support
+
+For issues or questions:
+- Connect with your assigned mentor
+- Check the Postman Documentation
+- Review the Assignment Checklist
+
+<div align="center">
+  <br/>
+  <h3>⭐ If this project helped you, please star the repository! ⭐</h3>
+  <p>Built with ❤️ for the Chess Community</p>
+</div>
