@@ -2,13 +2,13 @@
 const Player = require("../models/Player");
 const Opening = require("../models/Opening");
 
-// Victory distribution
+// ============ BASIC ANALYTICS ============
+
 const getVictoryDistribution = async (req, res) => {
     try {
         const distribution = await Game.aggregate([
             { $match: { isArchived: false } },
-            { $group: { _id: "$winner", count: { $sum: 1 } } },
-            { $project: { outcome: "$_id", count: 1, _id: 0 } }
+            { $group: { _id: "$winner", count: { $sum: 1 } } }
         ]);
         res.json({ success: true, data: distribution });
     } catch (error) {
@@ -16,7 +16,6 @@ const getVictoryDistribution = async (req, res) => {
     }
 };
 
-// Color advantage
 const getColorAdvantage = async (req, res) => {
     try {
         const whiteWins = await Game.countDocuments({ winner: "white", isArchived: false });
@@ -28,7 +27,6 @@ const getColorAdvantage = async (req, res) => {
     }
 };
 
-// Average turn count
 const getAverageTurnCount = async (req, res) => {
     try {
         const result = await Game.aggregate([
@@ -41,7 +39,6 @@ const getAverageTurnCount = async (req, res) => {
     }
 };
 
-// Rated vs casual
 const getRatedVsCasual = async (req, res) => {
     try {
         const rated = await Game.countDocuments({ rated: true, isArchived: false });
@@ -53,7 +50,6 @@ const getRatedVsCasual = async (req, res) => {
     }
 };
 
-// Time control usage
 const getTimeControlUsage = async (req, res) => {
     try {
         const timeControls = await Game.aggregate([
@@ -68,29 +64,26 @@ const getTimeControlUsage = async (req, res) => {
     }
 };
 
-// Shortest games
 const getShortestGames = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 10;
-        const games = await Game.find({ isArchived: false }).sort({ turns: 1 }).limit(limit).select("gameId white.username black.username turns winner");
+        const games = await Game.find({ isArchived: false }).sort({ turns: 1 }).limit(limit);
         res.json({ success: true, count: games.length, data: games });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// Longest games
 const getLongestGames = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 10;
-        const games = await Game.find({ isArchived: false }).sort({ turns: -1 }).limit(limit).select("gameId white.username black.username turns winner");
+        const games = await Game.find({ isArchived: false }).sort({ turns: -1 }).limit(limit);
         res.json({ success: true, count: games.length, data: games });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// Checkmate frequency
 const getCheckmateFrequency = async (req, res) => {
     try {
         const checkmates = await Game.countDocuments({ victoryStatus: "mate", isArchived: false });
@@ -101,7 +94,6 @@ const getCheckmateFrequency = async (req, res) => {
     }
 };
 
-// Draw frequency
 const getDrawFrequency = async (req, res) => {
     try {
         const draws = await Game.countDocuments({ winner: "draw", isArchived: false });
@@ -112,17 +104,17 @@ const getDrawFrequency = async (req, res) => {
     }
 };
 
-// Opening success
 const getOpeningSuccess = async (req, res) => {
     try {
-        const openings = await Opening.find().sort({ totalGames: -1 }).limit(10).select("eco name whiteWinRate blackWinRate totalGames");
+        const openings = await Opening.find().sort({ totalGames: -1 }).limit(10);
         res.json({ success: true, data: openings });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// Total matches
+// ============ STATISTICS ============
+
 const getTotalMatches = async (req, res) => {
     try {
         const total = await Game.countDocuments({ isArchived: false });
@@ -132,7 +124,6 @@ const getTotalMatches = async (req, res) => {
     }
 };
 
-// Total players
 const getTotalPlayers = async (req, res) => {
     try {
         const total = await Player.countDocuments();
@@ -142,7 +133,6 @@ const getTotalPlayers = async (req, res) => {
     }
 };
 
-// Average rating
 const getAverageRating = async (req, res) => {
     try {
         const result = await Player.aggregate([{ $group: { _id: null, averageRating: { $avg: "$currentRating" } } }]);
@@ -152,7 +142,8 @@ const getAverageRating = async (req, res) => {
     }
 };
 
-// Rating gap upsets
+// ============ ADVANCED ANALYTICS (PR #15) ============
+
 const getRatingGapUpsets = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 10;
@@ -176,7 +167,6 @@ const getRatingGapUpsets = async (req, res) => {
     }
 };
 
-// Player growth
 const getPlayerGrowth = async (req, res) => {
     try {
         const growth = await Player.aggregate([
@@ -190,7 +180,6 @@ const getPlayerGrowth = async (req, res) => {
     }
 };
 
-// Hourly activity
 const getHourlyActivity = async (req, res) => {
     try {
         const hourlyStats = await Game.aggregate([
@@ -204,6 +193,103 @@ const getHourlyActivity = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+// ============ TIME-BASED STATISTICS (PR #16) ============
+
+const getDailyGames = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 30;
+        const stats = await Game.aggregate([
+            { $match: { isArchived: false } },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: "$createdAt" },
+                        month: { $month: "$createdAt" },
+                        day: { $dayOfMonth: "$createdAt" }
+                    },
+                    games: { $sum: 1 }
+                }
+            },
+            { $sort: { "_id.year": -1, "_id.month": -1, "_id.day": -1 } },
+            { $limit: limit },
+            {
+                $project: {
+                    date: {
+                        $dateToString: {
+                            format: "%Y-%m-%d",
+                            date: {
+                                $dateFromParts: {
+                                    year: "$_id.year",
+                                    month: "$_id.month",
+                                    day: "$_id.day"
+                                }
+                            }
+                        }
+                    },
+                    games: 1,
+                    _id: 0
+                }
+            }
+        ]);
+        res.json({ success: true, count: stats.length, data: stats });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const getMonthlyGames = async (req, res) => {
+    try {
+        const stats = await Game.aggregate([
+            { $match: { isArchived: false } },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: "$createdAt" },
+                        month: { $month: "$createdAt" }
+                    },
+                    games: { $sum: 1 }
+                }
+            },
+            { $sort: { "_id.year": 1, "_id.month": 1 } },
+            {
+                $project: {
+                    year: "$_id.year",
+                    month: "$_id.month",
+                    monthName: {
+                        $let: {
+                            vars: {
+                                months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+                            },
+                            in: { $arrayElemAt: ["$$months", { $subtract: ["$_id.month", 1] }] }
+                        }
+                    },
+                    games: 1,
+                    _id: 0
+                }
+            }
+        ]);
+        res.json({ success: true, count: stats.length, data: stats });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const getYearlyGames = async (req, res) => {
+    try {
+        const stats = await Game.aggregate([
+            { $match: { isArchived: false } },
+            { $group: { _id: { year: { $year: "$createdAt" } }, games: { $sum: 1 } } },
+            { $sort: { "_id.year": 1 } },
+            { $project: { year: "$_id.year", games: 1, _id: 0 } }
+        ]);
+        res.json({ success: true, count: stats.length, data: stats });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// ============ EXPORTS ============
 
 module.exports = {
     getVictoryDistribution,
@@ -221,5 +307,8 @@ module.exports = {
     getAverageRating,
     getRatingGapUpsets,
     getPlayerGrowth,
-    getHourlyActivity
+    getHourlyActivity,
+    getDailyGames,
+    getMonthlyGames,
+    getYearlyGames
 };
