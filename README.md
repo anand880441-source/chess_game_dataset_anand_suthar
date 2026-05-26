@@ -376,25 +376,6 @@ Import the Postman collection from the documentation link or use the provided JS
 
 ---
 
-## 📅 Timeline
-
-| Phase | Duration | Status |
-| :--- | :--- | :--- |
-| Backend Setup | Day 1-2 | ✅ |
-| Database Models | Day 3-4 | ✅ |
-| Seeding Script | Day 5 | ✅ |
-| Match CRUD APIs | Day 6-7 | ✅ |
-| Advanced Match Endpoints | Day 8 | ✅ |
-| Player Routes | Day 9 | ✅ |
-| Opening Routes | Day 10 | ✅ |
-| Search Routes | Day 11 | ✅ |
-| Analytics & Statistics | Day 12 | ✅ |
-| Authentication (JWT) | Day 13 | ✅ |
-| Admin & System Routes | Day 14 | ✅ |
-| **Total** | **14 Days** | **100%** |
-
----
-
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
