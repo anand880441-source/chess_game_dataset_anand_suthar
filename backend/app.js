@@ -28,6 +28,7 @@ const openingRoutes = require("./src/routes/openingRoutes");
 const searchRoutes = require("./src/routes/searchRoutes");
 const analyticsRoutes = require("./src/routes/analyticsRoutes");
 const authRoutes = require("./src/routes/authRoutes");
+const adminRoutes = require("./src/routes/adminRoutes");
 
 // Use routes
 app.use("/api/v1/matches", gameRoutes);
@@ -36,6 +37,7 @@ app.use("/api/v1/openings", openingRoutes);
 app.use("/api/v1/search", searchRoutes);
 app.use("/api/v1", analyticsRoutes);
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/admin", adminRoutes);
 
 
 console.log("✅ Routes registered:");
