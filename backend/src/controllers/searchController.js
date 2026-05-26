@@ -1,9 +1,25 @@
 ﻿const Game = require("../models/Game");
 const Player = require("../models/Player");
 const Opening = require("../models/Opening");
+const SearchLog = require("../models/SearchLog");
 
-// @desc    Search matches by query
-// @route   GET /api/v1/search/matches?q=mate
+// Helper to log searches
+const logSearch = async (query, type, resultsCount, req) => {
+    try {
+        await SearchLog.create({
+            query,
+            type,
+            ipAddress: req.ip,
+            userAgent: req.headers["user-agent"],
+            userId: req.user?.id || null,
+            resultsCount
+        });
+    } catch (error) {
+        console.error("Search logging error:", error.message);
+    }
+};
+
+// @desc    Search matches
 const searchMatches = async (req, res) => {
     try {
         const query = req.query.q;
@@ -25,10 +41,7 @@ const searchMatches = async (req, res) => {
                 { "opening.name": searchRegex }
             ],
             isArchived: false
-        })
-        .skip(skip)
-        .limit(limit)
-        .sort({ createdAt: -1 });
+        }).skip(skip).limit(limit).sort({ createdAt: -1 });
         
         const total = await Game.countDocuments({
             $or: [
@@ -40,22 +53,15 @@ const searchMatches = async (req, res) => {
             isArchived: false
         });
         
-        res.json({
-            success: true,
-            count: games.length,
-            total,
-            page,
-            pages: Math.ceil(total / limit),
-            query,
-            data: games
-        });
+        await logSearch(query, "matches", games.length, req);
+        
+        res.json({ success: true, count: games.length, total, page, pages: Math.ceil(total / limit), query, data: games });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// @desc    Search players by username
-// @route   GET /api/v1/search/players?q=magnus
+// @desc    Search players
 const searchPlayers = async (req, res) => {
     try {
         const query = req.query.q;
@@ -63,23 +69,17 @@ const searchPlayers = async (req, res) => {
             return res.status(400).json({ success: false, message: "Search query required" });
         }
         
-        const players = await Player.find({
-            username: { $regex: query, $options: "i" }
-        }).limit(20);
+        const players = await Player.find({ username: { $regex: query, $options: "i" } }).limit(20);
         
-        res.json({
-            success: true,
-            count: players.length,
-            query,
-            data: players
-        });
+        await logSearch(query, "players", players.length, req);
+        
+        res.json({ success: true, count: players.length, query, data: players });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// @desc    Search openings by name
-// @route   GET /api/v1/search/openings?q=sicilian
+// @desc    Search openings
 const searchOpenings = async (req, res) => {
     try {
         const query = req.query.q;
@@ -87,23 +87,17 @@ const searchOpenings = async (req, res) => {
             return res.status(400).json({ success: false, message: "Search query required" });
         }
         
-        const openings = await Opening.find({
-            name: { $regex: query, $options: "i" }
-        }).limit(20);
+        const openings = await Opening.find({ name: { $regex: query, $options: "i" } }).limit(20);
         
-        res.json({
-            success: true,
-            count: openings.length,
-            query,
-            data: openings
-        });
+        await logSearch(query, "openings", openings.length, req);
+        
+        res.json({ success: true, count: openings.length, query, data: openings });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
 // @desc    Search by ECO code
-// @route   GET /api/v1/search/eco?q=B20
 const searchEco = async (req, res) => {
     try {
         const query = req.query.q;
@@ -111,161 +105,80 @@ const searchEco = async (req, res) => {
             return res.status(400).json({ success: false, message: "ECO code required" });
         }
         
-        const openings = await Opening.find({
-            eco: { $regex: query, $options: "i" }
-        }).limit(20);
+        const openings = await Opening.find({ eco: { $regex: query, $options: "i" } }).limit(20);
         
-        res.json({
-            success: true,
-            count: openings.length,
-            query,
-            data: openings
-        });
+        await logSearch(query, "eco", openings.length, req);
+        
+        res.json({ success: true, count: openings.length, query, data: openings });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// @desc    Search by move sequence
-// @route   GET /api/v1/search/moves?q=e4,e5
-const searchMoves = async (req, res) => {
+// @desc    Get recent searches
+const getRecentSearches = async (req, res) => {
     try {
-        const query = req.query.q;
-        if (!query) {
-            return res.status(400).json({ success: false, message: "Move sequence required" });
-        }
+        const limit = parseInt(req.query.limit) || 10;
+        const recentSearches = await SearchLog.aggregate([
+            { $group: { _id: "$query", count: { $sum: 1 }, lastSearched: { $max: "$createdAt" } } },
+            { $sort: { lastSearched: -1 } },
+            { $limit: limit },
+            { $project: { query: "$_id", count: 1, lastSearched: 1, _id: 0 } }
+        ]);
         
-        const movesPattern = query.replace(/,/g, " ");
-        
-        const games = await Game.find({
-            moves: { $regex: movesPattern, $options: "i" },
-            isArchived: false
-        }).limit(20);
-        
-        res.json({
-            success: true,
-            count: games.length,
-            query,
-            data: games
-        });
+        res.json({ success: true, count: recentSearches.length, data: recentSearches });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// @desc    Fuzzy search (more flexible)
-// @route   GET /api/v1/search/fuzzy?q=carokann
-const fuzzySearch = async (req, res) => {
+// @desc    Get popular searches
+const getPopularSearches = async (req, res) => {
     try {
-        const query = req.query.q;
-        if (!query) {
-            return res.status(400).json({ success: false, message: "Search query required" });
-        }
+        const limit = parseInt(req.query.limit) || 10;
+        const popularSearches = await SearchLog.aggregate([
+            { $group: { _id: "$query", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: limit },
+            { $project: { query: "$_id", count: 1, _id: 0 } }
+        ]);
         
-        // Create fuzzy pattern
-        const fuzzyPattern = query.split("").join(".*");
-        
-        const openings = await Opening.find({
-            name: { $regex: fuzzyPattern, $options: "i" }
-        }).limit(20);
-        
-        const players = await Player.find({
-            username: { $regex: fuzzyPattern, $options: "i" }
-        }).limit(10);
-        
-        res.json({
-            success: true,
-            query,
-            openings: { count: openings.length, data: openings },
-            players: { count: players.length, data: players }
-        });
+        res.json({ success: true, count: popularSearches.length, data: popularSearches });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// @desc    Autocomplete suggestions
-// @route   GET /api/v1/search/autocomplete?q=queen
-const autocomplete = async (req, res) => {
+// @desc    Advanced search with multiple filters
+const advancedSearch = async (req, res) => {
     try {
-        const query = req.query.q;
-        if (!query) {
-            return res.status(400).json({ success: false, message: "Query required" });
+        const { q, type, minRating, maxRating, startDate, endDate, winner, page = 1, limit = 20 } = req.query;
+        
+        let filter = { isArchived: false };
+        
+        if (q) {
+            const searchRegex = { $regex: q, $options: "i" };
+            filter.$or = [
+                { moves: searchRegex },
+                { "white.username": searchRegex },
+                { "black.username": searchRegex },
+                { "opening.name": searchRegex }
+            ];
         }
         
-        const searchRegex = { $regex: `^${query}`, $options: "i" };
+        if (winner && winner !== "any") filter.winner = winner;
+        if (minRating) filter["white.rating"] = { $gte: parseInt(minRating) };
+        if (maxRating) filter["black.rating"] = { $lte: parseInt(maxRating) };
+        if (startDate) filter.createdAt = { $gte: new Date(startDate) };
+        if (endDate) filter.createdAt = { ...filter.createdAt, $lte: new Date(endDate) };
         
-        const openingNames = await Opening.find({ name: searchRegex })
-            .select("name eco")
-            .limit(5);
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        const games = await Game.find(filter).skip(skip).limit(parseInt(limit)).sort({ createdAt: -1 });
+        const total = await Game.countDocuments(filter);
         
-        const playerNames = await Player.find({ username: searchRegex })
-            .select("username")
-            .limit(5);
+        await logSearch(q || "advanced", "general", games.length, req);
         
-        res.json({
-            success: true,
-            query,
-            suggestions: {
-                openings: openingNames,
-                players: playerNames
-            }
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
-// @desc    Search by player rating
-// @route   GET /api/v1/search/player-rating?rating=2500
-const searchByPlayerRating = async (req, res) => {
-    try {
-        const rating = parseInt(req.query.rating);
-        if (!rating) {
-            return res.status(400).json({ success: false, message: "Rating required" });
-        }
-        
-        const tolerance = parseInt(req.query.tolerance) || 100;
-        
-        const players = await Player.find({
-            currentRating: { $gte: rating - tolerance, $lte: rating + tolerance }
-        }).sort({ currentRating: -1 }).limit(20);
-        
-        res.json({
-            success: true,
-            count: players.length,
-            rating,
-            tolerance,
-            data: players
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
-// @desc    Search by date range
-// @route   GET /api/v1/search/date-range?from=2025-01-01&to=2025-02-01
-const searchByDateRange = async (req, res) => {
-    try {
-        const from = req.query.from ? new Date(req.query.from) : null;
-        const to = req.query.to ? new Date(req.query.to) : null;
-        
-        if (!from || !to) {
-            return res.status(400).json({ success: false, message: "From and to dates required" });
-        }
-        
-        const games = await Game.find({
-            createdAt: { $gte: from, $lte: to },
-            isArchived: false
-        }).sort({ createdAt: -1 }).limit(50);
-        
-        res.json({
-            success: true,
-            count: games.length,
-            from,
-            to,
-            data: games
-        });
+        res.json({ success: true, count: games.length, total, page: parseInt(page), pages: Math.ceil(total / parseInt(limit)), filters: req.query, data: games });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -276,9 +189,7 @@ module.exports = {
     searchPlayers,
     searchOpenings,
     searchEco,
-    searchMoves,
-    fuzzySearch,
-    autocomplete,
-    searchByPlayerRating,
-    searchByDateRange
+    getRecentSearches,
+    getPopularSearches,
+    advancedSearch
 };
