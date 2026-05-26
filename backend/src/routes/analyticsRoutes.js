@@ -16,10 +16,13 @@ const {
     getAverageRating,
     getRatingGapUpsets,
     getPlayerGrowth,
-    getHourlyActivity
+    getHourlyActivity,
+    getDailyGames,
+    getMonthlyGames,
+    getYearlyGames
 } = require("../controllers/analyticsController");
 
-// Analytics routes - all under /api/v1/analytics/*
+// Analytics routes
 router.get("/analytics/victory-distribution", getVictoryDistribution);
 router.get("/analytics/color-advantage", getColorAdvantage);
 router.get("/analytics/turn-count-average", getAverageTurnCount);
@@ -34,9 +37,14 @@ router.get("/analytics/rating-gap-upsets", getRatingGapUpsets);
 router.get("/analytics/player-growth", getPlayerGrowth);
 router.get("/analytics/hourly-activity", getHourlyActivity);
 
-// Statistics routes - under /api/v1/analytics/stats/*
+// Statistics routes
 router.get("/analytics/stats/total-matches", getTotalMatches);
 router.get("/analytics/stats/total-players", getTotalPlayers);
 router.get("/analytics/stats/average-rating", getAverageRating);
+
+// Time-based statistics routes (NEW - PR #16)
+router.get("/analytics/stats/daily-games", getDailyGames);
+router.get("/analytics/stats/monthly-games", getMonthlyGames);
+router.get("/analytics/stats/yearly-games", getYearlyGames);
 
 module.exports = router;
