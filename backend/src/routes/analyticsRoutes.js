@@ -42,7 +42,7 @@ router.get("/analytics/stats/total-matches", getTotalMatches);
 router.get("/analytics/stats/total-players", getTotalPlayers);
 router.get("/analytics/stats/average-rating", getAverageRating);
 
-// Time-based statistics routes (NEW - PR #16)
+// Time-based statistics routes
 router.get("/analytics/stats/daily-games", getDailyGames);
 router.get("/analytics/stats/monthly-games", getMonthlyGames);
 router.get("/analytics/stats/yearly-games", getYearlyGames);
