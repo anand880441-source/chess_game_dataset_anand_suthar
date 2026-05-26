@@ -15,6 +15,9 @@ const {
     getPlayerRecentMatches
 } = require("../controllers/playerController");
 
+// Import rating history from gameController
+const { getPlayerRatingHistory } = require("../controllers/gameController");
+
 // Top players routes (must be before /:username routes)
 router.get("/top-rated", getTopRatedPlayers);
 router.get("/top-active", getTopActivePlayers);
@@ -30,5 +33,6 @@ router.get("/:username/stats", getPlayerStats);
 router.get("/:username/openings", getPlayerOpenings);
 router.get("/:username/win-rate", getPlayerWinRate);
 router.get("/:username/recent", getPlayerRecentMatches);
+router.get("/:username/rating-history", getPlayerRatingHistory);
 
 module.exports = router;
