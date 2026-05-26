@@ -27,6 +27,7 @@ const playerRoutes = require("./src/routes/playerRoutes");
 const openingRoutes = require("./src/routes/openingRoutes");
 const searchRoutes = require("./src/routes/searchRoutes");
 const analyticsRoutes = require("./src/routes/analyticsRoutes");
+const authRoutes = require("./src/routes/authRoutes");
 
 // Use routes
 app.use("/api/v1/matches", gameRoutes);
@@ -34,6 +35,8 @@ app.use("/api/v1/players", playerRoutes);
 app.use("/api/v1/openings", openingRoutes);
 app.use("/api/v1/search", searchRoutes);
 app.use("/api/v1", analyticsRoutes);
+app.use("/api/v1/auth", authRoutes);
+
 
 console.log("✅ Routes registered:");
 console.log("   - GET  /api/v1/health");
@@ -56,6 +59,9 @@ console.log("   - GET  /api/v1/openings/win-rates");
 console.log("   - GET  /api/v1/search/matches");
 console.log("   - GET  /api/v1/search/players");
 console.log("   - GET  /api/v1/search/openings");
+console.log("   - POST /api/v1/auth/register");
+console.log("   - POST /api/v1/auth/login");
+console.log("   - GET  /api/v1/auth/profile");
 
 // Root route
 app.get("/", (req, res) => {
