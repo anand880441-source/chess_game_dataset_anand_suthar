@@ -5,7 +5,8 @@ const {
     getAllGames, getGameById, createGame, updateGame, deleteGame, getGameMoves,
     getLatestMatches, getTrendingMatches, archiveMatch, restoreMatch, getGamePgn, getRandomMatch,
     getGameFen, getGameAnalysis, getPlayerRatingHistory, getFilteredMatches,
-    getMatchesCursor, getMatchesInfinite
+    getMatchesCursor, getMatchesInfinite,
+    bulkUploadMatches, bulkUpdateMatches, bulkDeleteMatches, bulkArchiveMatches, bulkRestoreMatches
 } = require("../controllers/gameController");
 
 // Test route
@@ -18,9 +19,16 @@ router.get("/trending/list", getTrendingMatches);
 router.get("/random/game", getRandomMatch);
 router.post("/", createGame);
 
-// Advanced Pagination Routes (PR #17)
+// Advanced Pagination Routes
 router.get("/scroll", getMatchesCursor);
 router.get("/infinite", getMatchesInfinite);
+
+// Bulk Operations Routes
+router.post("/bulk-upload", bulkUploadMatches);
+router.patch("/bulk-update", bulkUpdateMatches);
+router.delete("/bulk-delete", bulkDeleteMatches);
+router.patch("/bulk/archive", bulkArchiveMatches);
+router.patch("/bulk/restore", bulkRestoreMatches);
 
 // Filter routes
 router.get("/filter/:type", getFilteredMatches);

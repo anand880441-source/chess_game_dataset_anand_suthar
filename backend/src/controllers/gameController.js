@@ -200,7 +200,7 @@ const getFilteredMatches = async (req, res) => {
     }
 };
 
-// ============ ADVANCED PAGINATION (PR #17) ============
+// ============ ADVANCED PAGINATION ============
 
 const getMatchesCursor = async (req, res) => {
     try {
@@ -229,9 +229,82 @@ const getMatchesInfinite = async (req, res) => {
     }
 };
 
+// ============ BULK OPERATIONS (PR #18) ============
+
+const bulkUploadMatches = async (req, res) => {
+    try {
+        const { matches } = req.body;
+        if (!matches || !Array.isArray(matches)) {
+            return res.status(400).json({ success: false, message: "Please provide an array of matches" });
+        }
+        const inserted = await Game.insertMany(matches, { ordered: false });
+        res.status(201).json({ success: true, message: `${inserted.length} matches uploaded`, count: inserted.length, data: inserted });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const bulkUpdateMatches = async (req, res) => {
+    try {
+        const { updates } = req.body;
+        if (!updates || !Array.isArray(updates)) {
+            return res.status(400).json({ success: false, message: "Please provide an array of updates" });
+        }
+        const operations = updates.map(update => ({
+            updateOne: { filter: { gameId: update.gameId }, update: { $set: update.data } }
+        }));
+        const result = await Game.bulkWrite(operations);
+        res.json({ success: true, matched: result.matchedCount, modified: result.modifiedCount });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const bulkDeleteMatches = async (req, res) => {
+    try {
+        const { gameIds } = req.body;
+        if (!gameIds || !Array.isArray(gameIds)) {
+            return res.status(400).json({ success: false, message: "Please provide an array of gameIds" });
+        }
+        const result = await Game.deleteMany({ gameId: { $in: gameIds } });
+        res.json({ success: true, deleted: result.deletedCount });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const bulkArchiveMatches = async (req, res) => {
+    try {
+        const { gameIds } = req.body;
+        if (!gameIds || !Array.isArray(gameIds)) {
+            return res.status(400).json({ success: false, message: "Please provide an array of gameIds" });
+        }
+        const result = await Game.updateMany({ gameId: { $in: gameIds } }, { isArchived: true });
+        res.json({ success: true, archived: result.modifiedCount });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const bulkRestoreMatches = async (req, res) => {
+    try {
+        const { gameIds } = req.body;
+        if (!gameIds || !Array.isArray(gameIds)) {
+            return res.status(400).json({ success: false, message: "Please provide an array of gameIds" });
+        }
+        const result = await Game.updateMany({ gameId: { $in: gameIds } }, { isArchived: false });
+        res.json({ success: true, restored: result.modifiedCount });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// ============ EXPORTS ============
+
 module.exports = {
     getAllGames, getGameById, createGame, updateGame, deleteGame, getGameMoves,
     getLatestMatches, getTrendingMatches, archiveMatch, restoreMatch, getGamePgn, getRandomMatch,
     getGameFen, getGameAnalysis, getPlayerRatingHistory, getFilteredMatches,
-    getMatchesCursor, getMatchesInfinite
+    getMatchesCursor, getMatchesInfinite,
+    bulkUploadMatches, bulkUpdateMatches, bulkDeleteMatches, bulkArchiveMatches, bulkRestoreMatches
 };
