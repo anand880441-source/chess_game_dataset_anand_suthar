@@ -2,8 +2,14 @@
 const cors = require("cors");
 const app = express();
 
+// CORS configuration - single setup
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 // Middleware
-app.use(cors());
 app.use(express.json());
 
 // Request logging
@@ -38,7 +44,6 @@ app.use("/api/v1/search", searchRoutes);
 app.use("/api/v1", analyticsRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/admin", adminRoutes);
-
 
 console.log("✅ Routes registered:");
 console.log("   - GET  /api/v1/health");
