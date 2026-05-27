@@ -1,20 +1,26 @@
-﻿import React from 'react';
+﻿import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import MainLayout from './layouts/MainLayout';
 
-// Temporary placeholder components (will be created in next PRs)
-const Dashboard = () => <div className="p-8"><h1 className="text-2xl">Dashboard (Coming Soon)</h1></div>;
-const Players = () => <div className="p-8"><h1 className="text-2xl">Players (Coming Soon)</h1></div>;
-const Matches = () => <div className="p-8"><h1 className="text-2xl">Matches (Coming Soon)</h1></div>;
-const Openings = () => <div className="p-8"><h1 className="text-2xl">Openings (Coming Soon)</h1></div>;
-const Analytics = () => <div className="p-8"><h1 className="text-2xl">Analytics (Coming Soon)</h1></div>;
+// Lazy load pages
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Players = lazy(() => import('./pages/Players'));
+const Matches = lazy(() => import('./pages/Matches'));
+const Openings = lazy(() => import('./pages/Openings'));
+const Analytics = lazy(() => import('./pages/Analytics'));
+const Settings = lazy(() => import('./pages/Settings'));
+
+const LoadingSpinner = () => (
+    <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+    </div>
+);
 
 function App() {
-    const { theme } = useSelector((state) => state.ui);
-
     return (
         <Router>
             <Routes>
@@ -22,35 +28,68 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 
-                {/* Protected Routes */}
+                {/* Protected Routes with Top Navbar Layout */}
                 <Route path="/" element={
                     <ProtectedRoute>
-                        <Dashboard />
+                        <MainLayout>
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <Dashboard />
+                            </Suspense>
+                        </MainLayout>
                     </ProtectedRoute>
                 } />
                 <Route path="/dashboard" element={
                     <ProtectedRoute>
-                        <Dashboard />
+                        <MainLayout>
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <Dashboard />
+                            </Suspense>
+                        </MainLayout>
                     </ProtectedRoute>
                 } />
                 <Route path="/players" element={
                     <ProtectedRoute>
-                        <Players />
+                        <MainLayout>
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <Players />
+                            </Suspense>
+                        </MainLayout>
                     </ProtectedRoute>
                 } />
                 <Route path="/matches" element={
                     <ProtectedRoute>
-                        <Matches />
+                        <MainLayout>
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <Matches />
+                            </Suspense>
+                        </MainLayout>
                     </ProtectedRoute>
                 } />
                 <Route path="/openings" element={
                     <ProtectedRoute>
-                        <Openings />
+                        <MainLayout>
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <Openings />
+                            </Suspense>
+                        </MainLayout>
                     </ProtectedRoute>
                 } />
                 <Route path="/analytics" element={
                     <ProtectedRoute>
-                        <Analytics />
+                        <MainLayout>
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <Analytics />
+                            </Suspense>
+                        </MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/settings" element={
+                    <ProtectedRoute>
+                        <MainLayout>
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <Settings />
+                            </Suspense>
+                        </MainLayout>
                     </ProtectedRoute>
                 } />
             </Routes>
