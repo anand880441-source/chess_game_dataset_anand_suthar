@@ -13,6 +13,10 @@ const analyticsService = {
         const response = await api.get('/analytics/checkmate-frequency');
         return response.data;
     },
+    getAverageRating: async () => {
+        const response = await api.get('/analytics/stats/average-rating');
+        return response.data;
+    },
     getDailyGames: async (limit = 30) => {
         const response = await api.get(`/analytics/stats/daily-games?limit=${limit}`);
         return response.data;
@@ -23,6 +27,14 @@ const analyticsService = {
     },
     getYearlyGames: async () => {
         const response = await api.get('/analytics/stats/yearly-games');
+        return response.data;
+    },
+    getTopGames: async (params = {}) => {
+        const response = await api.get('/analytics/top-games', { params });
+        return response.data;
+    },
+    getOpeningSuccess: async () => {
+        const response = await api.get('/analytics/opening-success');
         return response.data;
     },
 };
