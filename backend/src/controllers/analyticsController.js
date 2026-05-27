@@ -142,7 +142,7 @@ const getAverageRating = async (req, res) => {
     }
 };
 
-// ============ ADVANCED ANALYTICS (PR #15) ============
+// ============ ADVANCED ANALYTICS ============
 
 const getRatingGapUpsets = async (req, res) => {
     try {
@@ -194,43 +194,16 @@ const getHourlyActivity = async (req, res) => {
     }
 };
 
-// ============ TIME-BASED STATISTICS (PR #16) ============
+// ============ TIME-BASED STATISTICS ============
 
 const getDailyGames = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 30;
         const stats = await Game.aggregate([
             { $match: { isArchived: false } },
-            {
-                $group: {
-                    _id: {
-                        year: { $year: "$createdAt" },
-                        month: { $month: "$createdAt" },
-                        day: { $dayOfMonth: "$createdAt" }
-                    },
-                    games: { $sum: 1 }
-                }
-            },
+            { $group: { _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" }, day: { $dayOfMonth: "$createdAt" } }, games: { $sum: 1 } } },
             { $sort: { "_id.year": -1, "_id.month": -1, "_id.day": -1 } },
-            { $limit: limit },
-            {
-                $project: {
-                    date: {
-                        $dateToString: {
-                            format: "%Y-%m-%d",
-                            date: {
-                                $dateFromParts: {
-                                    year: "$_id.year",
-                                    month: "$_id.month",
-                                    day: "$_id.day"
-                                }
-                            }
-                        }
-                    },
-                    games: 1,
-                    _id: 0
-                }
-            }
+            { $limit: limit }
         ]);
         res.json({ success: true, count: stats.length, data: stats });
     } catch (error) {
@@ -242,32 +215,8 @@ const getMonthlyGames = async (req, res) => {
     try {
         const stats = await Game.aggregate([
             { $match: { isArchived: false } },
-            {
-                $group: {
-                    _id: {
-                        year: { $year: "$createdAt" },
-                        month: { $month: "$createdAt" }
-                    },
-                    games: { $sum: 1 }
-                }
-            },
-            { $sort: { "_id.year": 1, "_id.month": 1 } },
-            {
-                $project: {
-                    year: "$_id.year",
-                    month: "$_id.month",
-                    monthName: {
-                        $let: {
-                            vars: {
-                                months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-                            },
-                            in: { $arrayElemAt: ["$$months", { $subtract: ["$_id.month", 1] }] }
-                        }
-                    },
-                    games: 1,
-                    _id: 0
-                }
-            }
+            { $group: { _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } }, games: { $sum: 1 } } },
+            { $sort: { "_id.year": 1, "_id.month": 1 } }
         ]);
         res.json({ success: true, count: stats.length, data: stats });
     } catch (error) {
@@ -280,10 +229,43 @@ const getYearlyGames = async (req, res) => {
         const stats = await Game.aggregate([
             { $match: { isArchived: false } },
             { $group: { _id: { year: { $year: "$createdAt" } }, games: { $sum: 1 } } },
-            { $sort: { "_id.year": 1 } },
-            { $project: { year: "$_id.year", games: 1, _id: 0 } }
+            { $sort: { "_id.year": 1 } }
         ]);
         res.json({ success: true, count: stats.length, data: stats });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// ============ FASTEST MATE OPENINGS ============
+
+const getFastestMateOpenings = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+        const fastestMates = await Game.aggregate([
+            { $match: { victoryStatus: "mate", isArchived: false } },
+            {
+                $group: {
+                    _id: { eco: "$opening.eco", name: "$opening.name" },
+                    games: { $sum: 1 },
+                    avgTurns: { $avg: "$turns" },
+                    minTurns: { $min: "$turns" }
+                }
+            },
+            { $sort: { minTurns: 1 } },
+            { $limit: limit },
+            {
+                $project: {
+                    eco: "$_id.eco",
+                    name: "$_id.name",
+                    totalCheckmates: "$games",
+                    averageTurnsToMate: { $round: ["$avgTurns", 0] },
+                    fastestMate: "$minTurns",
+                    _id: 0
+                }
+            }
+        ]);
+        res.json({ success: true, count: fastestMates.length, data: fastestMates });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -310,5 +292,6 @@ module.exports = {
     getHourlyActivity,
     getDailyGames,
     getMonthlyGames,
-    getYearlyGames
+    getYearlyGames,
+    getFastestMateOpenings
 };
