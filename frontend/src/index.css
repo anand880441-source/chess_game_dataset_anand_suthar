@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 @theme {
   --color-primary-50: #eef2ff;
@@ -11,6 +11,20 @@
   --color-primary-700: #4338ca;
   --color-primary-800: #3730a3;
   --color-primary-900: #312e81;
+  
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+  
+  --color-amber-100: #fef3c7;
+  --color-amber-800: #92400e;
 }
 
 @layer base {
@@ -34,12 +48,12 @@
     padding: 1.5rem;
     border: 1px solid var(--color-gray-200);
   }
-
+  
   .dark .card {
     background-color: var(--color-gray-800);
     border-color: var(--color-gray-700);
   }
-
+  
   .btn-primary {
     background-color: var(--color-primary-600);
     color: white;
@@ -49,12 +63,12 @@
     transition-property: all;
     transition-duration: 200ms;
   }
-
+  
   .btn-primary:hover {
     background-color: var(--color-primary-700);
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   }
-
+  
   .btn-secondary {
     background-color: var(--color-gray-200);
     color: var(--color-gray-800);
@@ -64,20 +78,20 @@
     transition-property: all;
     transition-duration: 200ms;
   }
-
+  
   .btn-secondary:hover {
     background-color: var(--color-gray-300);
   }
-
+  
   .dark .btn-secondary {
     background-color: var(--color-gray-700);
     color: var(--color-gray-200);
   }
-
+  
   .dark .btn-secondary:hover {
     background-color: var(--color-gray-600);
   }
-
+  
   .input {
     width: 100%;
     padding: 0.5rem 1rem;
@@ -85,18 +99,18 @@
     border-radius: 0.5rem;
     background-color: white;
   }
-
+  
   .input:focus {
     outline: none;
     ring: 2px solid var(--color-primary-500);
   }
-
+  
   .dark .input {
     background-color: var(--color-gray-800);
     border-color: var(--color-gray-600);
     color: var(--color-gray-100);
   }
-
+  
   .label {
     display: block;
     font-size: 0.875rem;
@@ -104,8 +118,63 @@
     margin-bottom: 0.25rem;
     color: var(--color-gray-700);
   }
-
+  
   .dark .label {
     color: var(--color-gray-300);
   }
+}
+
+/* Chess Board Styles */
+.bg-amber-100 {
+  background-color: var(--color-amber-100);
+}
+
+.bg-amber-800 {
+  background-color: var(--color-amber-800);
+}
+
+.dark .bg-amber-100 {
+  background-color: #4a4535;
+}
+
+.dark .bg-amber-800 {
+  background-color: #2a2618;
+}
+
+.chess-piece-white {
+  color: #ffffff !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.chess-piece-black {
+  color: #1a1a1a !important;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+.bg-amber-100 .chess-piece-white {
+  color: #ffffff !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.bg-amber-100 .chess-piece-black {
+  color: #0a0a0a !important;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.bg-amber-800 .chess-piece-white {
+  color: #f0f0f0 !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.bg-amber-800 .chess-piece-black {
+  color: #2a2a2a !important;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+.dark .chess-piece-white {
+  color: #e8e8e8 !important;
+}
+
+.dark .chess-piece-black {
+  color: #1a1a1a !important;
 }

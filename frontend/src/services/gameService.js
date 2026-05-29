@@ -17,6 +17,14 @@ const gameService = {
         const response = await api.get(`/matches/${id}/pgn`);
         return response.data;
     },
+    getFEN: async (id) => {
+        const response = await api.get(`/matches/${id}/fen`);
+        return response.data;
+    },
+    getAnalysis: async (id) => {
+        const response = await api.get(`/matches/${id}/analysis`);
+        return response.data;
+    },
     getLatest: async (limit = 10) => {
         const response = await api.get(`/matches/latest/list?limit=${limit}`);
         return response.data;

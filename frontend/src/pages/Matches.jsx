@@ -1,10 +1,11 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import gameService from '../services/gameService';
 import toast from 'react-hot-toast';
 
 function Matches() {
+    const navigate = useNavigate();
     const [matches, setMatches] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
@@ -204,13 +205,18 @@ function Matches() {
                                     </tr>
                                 ) : (
                                     matches.map((match) => (
-                                        <tr key={match._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                        <tr 
+                                            key={match._id} 
+                                            className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer" 
+                                            onClick={() => navigate(`/matches/${match.gameId}`)}
+                                        >
                                             <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
                                                 {new Date(match.createdAt).toLocaleDateString()}
                                             </td>
                                             <td className="px-4 py-3">
                                                 <Link 
                                                     to={`/players/${match.white?.username}`}
+                                                    onClick={(e) => e.stopPropagation()}
                                                     className="text-primary-600 dark:text-primary-400 hover:underline"
                                                 >
                                                     {match.white?.username}
@@ -220,6 +226,7 @@ function Matches() {
                                             <td className="px-4 py-3">
                                                 <Link 
                                                     to={`/players/${match.black?.username}`}
+                                                    onClick={(e) => e.stopPropagation()}
                                                     className="text-primary-600 dark:text-primary-400 hover:underline"
                                                 >
                                                     {match.black?.username}

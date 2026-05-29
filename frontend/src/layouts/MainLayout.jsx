@@ -12,6 +12,7 @@ const icons = {
     matches: '♟️',
     openings: '📚',
     analytics: '📈',
+    profile: '👤',
     settings: '⚙️',
     logout: '🚪',
     menu: '☰',
@@ -27,6 +28,7 @@ const navItems = [
     { path: '/matches', name: 'Matches', icon: icons.matches },
     { path: '/openings', name: 'Openings', icon: icons.openings },
     { path: '/analytics', name: 'Analytics', icon: icons.analytics },
+    { path: '/profile', name: 'Profile', icon: icons.profile },
     { path: '/settings', name: 'Settings', icon: icons.settings },
 ];
 
@@ -128,22 +130,28 @@ function MainLayout({ children }) {
                                                         {user?.email}
                                                     </p>
                                                 </div>
-                                                <button
-                                                    onClick={() => {
-                                                        setUserDropdownOpen(false);
-                                                        navigate('/settings');
-                                                    }}
-                                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                                                <Link
+                                                    to="/profile"
+                                                    onClick={() => setUserDropdownOpen(false)}
+                                                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                >
+                                                    <span>{icons.profile}</span>
+                                                    <span>Profile</span>
+                                                </Link>
+                                                <Link
+                                                    to="/settings"
+                                                    onClick={() => setUserDropdownOpen(false)}
+                                                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                                                 >
                                                     <span>{icons.settings}</span>
                                                     <span>Settings</span>
-                                                </button>
+                                                </Link>
                                                 <button
                                                     onClick={() => {
                                                         setUserDropdownOpen(false);
                                                         handleLogout();
                                                     }}
-                                                    className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                                                    className="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                                                 >
                                                     <span>{icons.logout}</span>
                                                     <span>Logout</span>

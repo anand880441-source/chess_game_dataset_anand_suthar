@@ -10,10 +10,13 @@ import MainLayout from './layouts/MainLayout';
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Players = lazy(() => import('./pages/Players'));
 const Matches = lazy(() => import('./pages/Matches'));
+const MatchDetail = lazy(() => import('./pages/MatchDetail'));
 const Openings = lazy(() => import('./pages/Openings'));
 const Analytics = lazy(() => import('./pages/Analytics'));
+const Profile = lazy(() => import('./pages/Profile'));
 const Settings = lazy(() => import('./pages/Settings'));
 
+// Loading component
 const LoadingSpinner = () => (
     <div className="flex items-center justify-center min-h-[60vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
@@ -28,7 +31,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 
-                {/* Protected Routes with Top Navbar Layout */}
+                {/* Protected Routes with Layout */}
                 <Route path="/" element={
                     <ProtectedRoute>
                         <MainLayout>
@@ -65,6 +68,15 @@ function App() {
                         </MainLayout>
                     </ProtectedRoute>
                 } />
+                <Route path="/matches/:id" element={
+                    <ProtectedRoute>
+                        <MainLayout>
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <MatchDetail />
+                            </Suspense>
+                        </MainLayout>
+                    </ProtectedRoute>
+                } />
                 <Route path="/openings" element={
                     <ProtectedRoute>
                         <MainLayout>
@@ -79,6 +91,15 @@ function App() {
                         <MainLayout>
                             <Suspense fallback={<LoadingSpinner />}>
                                 <Analytics />
+                            </Suspense>
+                        </MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                    <ProtectedRoute>
+                        <MainLayout>
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <Profile />
                             </Suspense>
                         </MainLayout>
                     </ProtectedRoute>
