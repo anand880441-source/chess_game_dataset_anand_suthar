@@ -13,6 +13,7 @@ const PlayerDetail = lazy(() => import('./pages/PlayerDetail'));
 const Matches = lazy(() => import('./pages/Matches'));
 const MatchDetail = lazy(() => import('./pages/MatchDetail'));
 const Openings = lazy(() => import('./pages/Openings'));
+const OpeningDetail = lazy(() => import('./pages/OpeningDetail'));
 const Analytics = lazy(() => import('./pages/Analytics'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Settings = lazy(() => import('./pages/Settings'));
@@ -92,6 +93,15 @@ function App() {
                         <MainLayout>
                             <Suspense fallback={<LoadingSpinner />}>
                                 <Openings />
+                            </Suspense>
+                        </MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/openings/:ecoCode" element={
+                    <ProtectedRoute>
+                        <MainLayout>
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <OpeningDetail />
                             </Suspense>
                         </MainLayout>
                     </ProtectedRoute>

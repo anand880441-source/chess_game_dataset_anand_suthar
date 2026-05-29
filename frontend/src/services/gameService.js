@@ -2,7 +2,16 @@
 
 const gameService = {
     getAll: async (params = {}) => {
-        const response = await api.get('/matches', { params });
+        // Build query string for opening filter
+        let queryParams = { ...params };
+        
+        // Handle opening ECO filter
+        if (params.openingEco) {
+            queryParams['opening.eco'] = params.openingEco;
+            delete queryParams.openingEco;
+        }
+        
+        const response = await api.get('/matches', { params: queryParams });
         return response.data;
     },
     getById: async (id) => {
@@ -40,6 +49,18 @@ const gameService = {
     filter: async (type, params = {}) => {
         const response = await api.get(`/matches/filter/${type}`, { params });
         return response.data;
+    },
+    getByOpeningEco: async (ecoCode, limit = 10) => {
+        // Fetch all matches and filter client-side since backend doesn't support opening filter directly
+        const response = await api.get('/matches', { params: { limit: 100 } });
+        if (response.data.success && response.data.data) {
+            const filtered = response.data.data.filter(game => 
+                game.opening?.eco === ecoCode || 
+                game.opening?.eco?.toLowerCase() === ecoCode?.toLowerCase()
+            );
+            return { success: true, data: filtered.slice(0, limit) };
+        }
+        return { success: false, data: [] };
     },
 };
 
