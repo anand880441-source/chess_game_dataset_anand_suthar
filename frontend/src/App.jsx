@@ -17,6 +17,8 @@ const OpeningDetail = lazy(() => import('./pages/OpeningDetail'));
 const Analytics = lazy(() => import('./pages/Analytics'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Settings = lazy(() => import('./pages/Settings'));
+const SearchResults = lazy(() => import('./pages/SearchResults'));
+
 
 // Loading component
 const LoadingSpinner = () => (
@@ -32,7 +34,7 @@ function App() {
                 {/* Auth Routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                
+
                 {/* Protected Routes with Layout */}
                 <Route path="/" element={
                     <ProtectedRoute>
@@ -124,6 +126,7 @@ function App() {
                         </MainLayout>
                     </ProtectedRoute>
                 } />
+                <Route path="/search" element={<ProtectedRoute><MainLayout><Suspense fallback={<LoadingSpinner />}><SearchResults /></Suspense></MainLayout></ProtectedRoute>} />
                 <Route path="/settings" element={
                     <ProtectedRoute>
                         <MainLayout>

@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { logout } from '../store/slices/authSlice';
 import { toggleTheme } from '../store/slices/uiSlice';
+import SearchBar from '../components/search/SearchBar';
 import toast from 'react-hot-toast';
 
 // Icons
@@ -19,7 +20,6 @@ const icons = {
     close: '✕',
     light: '☀️',
     dark: '🌙',
-    user: '👤',
 };
 
 const navItems = [
@@ -67,7 +67,12 @@ function MainLayout({ children }) {
                             </Link>
                         </div>
 
-                        {/* Desktop Navigation - Center */}
+                        {/* Search Bar - Desktop */}
+                        <div className="hidden md:flex items-center flex-1 max-w-md mx-4">
+                            <SearchBar />
+                        </div>
+
+                        {/* Desktop Navigation */}
                         <div className="hidden md:flex items-center space-x-1">
                             {navItems.map((item) => (
                                 <Link
@@ -178,6 +183,10 @@ function MainLayout({ children }) {
             {mobileMenuOpen && (
                 <div className="md:hidden fixed inset-0 z-40 bg-white dark:bg-gray-800 pt-16">
                     <div className="px-4 py-4 space-y-1">
+                        {/* Search Bar in Mobile */}
+                        <div className="mb-4">
+                            <SearchBar />
+                        </div>
                         {navItems.map((item) => (
                             <Link
                                 key={item.path}
