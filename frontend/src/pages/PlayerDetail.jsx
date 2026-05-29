@@ -14,6 +14,7 @@ function PlayerDetail() {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('overview');
+    const [notFound, setNotFound] = useState(false);
 
     useEffect(() => {
         fetchPlayerData();
@@ -21,17 +22,35 @@ function PlayerDetail() {
 
     const fetchPlayerData = async () => {
         setLoading(true);
+        setNotFound(false);
         try {
             // Fetch player details
-            const playerRes = await playerService.getByUsername(username);
-            if (playerRes.success) {
-                setPlayer(playerRes.data);
+            try {
+                const playerRes = await playerService.getByUsername(username);
+                if (playerRes.success && playerRes.data) {
+                    setPlayer(playerRes.data);
+                } else {
+                    setNotFound(true);
+                    setLoading(false);
+                    return;
+                }
+            } catch (err) {
+                if (err.response?.status === 404) {
+                    setNotFound(true);
+                    setLoading(false);
+                    return;
+                }
+                throw err;
             }
 
             // Fetch player stats
-            const statsRes = await playerService.getStats(username);
-            if (statsRes.success) {
-                setStats(statsRes.data);
+            try {
+                const statsRes = await playerService.getStats(username);
+                if (statsRes.success) {
+                    setStats(statsRes.data);
+                }
+            } catch (e) {
+                console.log('Stats not available');
             }
 
             // Fetch rating history
@@ -51,14 +70,18 @@ function PlayerDetail() {
             }
 
             // Fetch recent matches
-            const matchesRes = await playerService.getHistory(username, 10);
-            if (matchesRes.success && matchesRes.data) {
-                setRecentMatches(matchesRes.data);
+            try {
+                const matchesRes = await playerService.getHistory(username, 10);
+                if (matchesRes.success && matchesRes.data) {
+                    setRecentMatches(matchesRes.data);
+                }
+            } catch (e) {
+                console.log('Matches history not available');
             }
 
         } catch (error) {
             console.error('Error fetching player data:', error);
-            toast.error('Failed to load player data');
+            setNotFound(true);
         } finally {
             setLoading(false);
         }
@@ -78,10 +101,14 @@ function PlayerDetail() {
         );
     }
 
-    if (!player) {
+    if (notFound || !player) {
         return (
             <div className="text-center py-12">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Player not found</h2>
+                <div className="text-6xl mb-4">👤</div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Player Not Found</h2>
+                <p className="text-gray-500 dark:text-gray-400 mt-2">
+                    The player "{username}" does not exist in the database.
+                </p>
                 <Link to="/players" className="text-primary-600 hover:underline mt-4 inline-block">
                     ← Back to Players
                 </Link>
@@ -232,49 +259,55 @@ function PlayerDetail() {
 
                         {activeTab === 'matches' && (
                             <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead className="bg-gray-50 dark:bg-gray-700/50">
-                                        <tr>
-                                            <th className="px-4 py-2 text-left text-xs font-medium">Opponent</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium">Result</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium">Moves</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium">Date</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200">
-                                        {recentMatches.map((match) => {
-                                            // Determine result based on the match data
-                                            let result = 'Loss';
-                                            if (match.result === 'Win' || match.resultForPlayer === 'Win') {
-                                                result = 'Win';
-                                            } else if (match.result === 'Draw' || match.resultForPlayer === 'Draw') {
-                                                result = 'Draw';
-                                            } else if (match.winner === 'draw') {
-                                                result = 'Draw';
-                                            } else if ((match.white?.username === username && match.winner === 'white') ||
-                                                       (match.black?.username === username && match.winner === 'black')) {
-                                                result = 'Win';
-                                            }
-                                            
-                                            const opponent = match.opponent || (match.white?.username === username ? match.black?.username : match.white?.username);
-                                            const moves = match.turns || match.moves?.length;
-                                            const date = match.createdAt ? new Date(match.createdAt).toLocaleDateString() : 'Unknown';
-                                            
-                                            return (
-                                                <tr key={match._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                                    <td className="px-4 py-2">
-                                                        <Link to={`/players/${opponent}`} className="text-primary-600 hover:underline">
-                                                            {opponent}
-                                                        </Link>
-                                                     </td>
-                                                    <td className={`px-4 py-2 font-medium ${getResultColor(result)}`}>{result}</td>
-                                                    <td className="px-4 py-2 text-gray-600">{moves}</td>
-                                                    <td className="px-4 py-2 text-gray-500 text-sm">{date}</td>
-                                                 </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                 </table>
+                                {recentMatches.length > 0 ? (
+                                    <table className="w-full">
+                                        <thead className="bg-gray-50 dark:bg-gray-700/50">
+                                            <tr>
+                                                <th className="px-4 py-2 text-left text-xs font-medium">Opponent</th>
+                                                <th className="px-4 py-2 text-left text-xs font-medium">Result</th>
+                                                <th className="px-4 py-2 text-left text-xs font-medium">Moves</th>
+                                                <th className="px-4 py-2 text-left text-xs font-medium">Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-200">
+                                            {recentMatches.map((match) => {
+                                                let result = 'Loss';
+                                                if (match.result === 'Win' || match.resultForPlayer === 'Win') {
+                                                    result = 'Win';
+                                                } else if (match.result === 'Draw' || match.resultForPlayer === 'Draw') {
+                                                    result = 'Draw';
+                                                } else if (match.winner === 'draw') {
+                                                    result = 'Draw';
+                                                } else if ((match.white?.username === username && match.winner === 'white') ||
+                                                           (match.black?.username === username && match.winner === 'black')) {
+                                                    result = 'Win';
+                                                }
+                                                
+                                                const opponent = match.opponent || (match.white?.username === username ? match.black?.username : match.white?.username);
+                                                const moves = match.turns || match.moves?.length;
+                                                const date = match.createdAt ? new Date(match.createdAt).toLocaleDateString() : 'Unknown';
+                                                
+                                                // Skip if opponent is the same as current user (self-reference)
+                                                if (opponent === username) return null;
+                                                
+                                                return (
+                                                    <tr key={match._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                        <td className="px-4 py-2">
+                                                            <Link to={`/players/${opponent}`} className="text-primary-600 hover:underline">
+                                                                {opponent}
+                                                            </Link>
+                                                         </td>
+                                                        <td className={`px-4 py-2 font-medium ${getResultColor(result)}`}>{result}</td>
+                                                        <td className="px-4 py-2 text-gray-600">{moves}</td>
+                                                        <td className="px-4 py-2 text-gray-500 text-sm">{date}</td>
+                                                     </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                ) : (
+                                    <p className="text-center text-gray-500 py-8">No recent matches available</p>
+                                )}
                             </div>
                         )}
                     </div>
