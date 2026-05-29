@@ -1,22 +1,19 @@
 ﻿const express = require("express");
 const router = express.Router();
 const {
+    globalSearch,
+    getAutocomplete,
     searchMatches,
     searchPlayers,
     searchOpenings,
-    searchEco,
-    getRecentSearches,
-    getPopularSearches,
-    advancedSearch
+    searchByEco
 } = require("../controllers/searchController");
 
-// Search routes
+router.get("/global", globalSearch);
+router.get("/autocomplete", getAutocomplete);
 router.get("/matches", searchMatches);
 router.get("/players", searchPlayers);
 router.get("/openings", searchOpenings);
-router.get("/eco", searchEco);
-router.get("/recent", getRecentSearches);
-router.get("/popular", getPopularSearches);
-router.get("/advanced", advancedSearch);
+router.get("/eco", searchByEco);
 
 module.exports = router;

@@ -3,193 +3,177 @@ const Player = require("../models/Player");
 const Opening = require("../models/Opening");
 const SearchLog = require("../models/SearchLog");
 
-// Helper to log searches
-const logSearch = async (query, type, resultsCount, req) => {
+// @desc    Global search across all entities
+// @route   GET /api/v1/search/global
+const globalSearch = async (req, res) => {
     try {
-        await SearchLog.create({
-            query,
-            type,
-            ipAddress: req.ip,
-            userAgent: req.headers["user-agent"],
-            userId: req.user?.id || null,
-            resultsCount
+        const { q, type = "all", limit = 20 } = req.query;
+        
+        if (!q) {
+            return res.status(400).json({ success: false, message: "Search query required" });
+        }
+        
+        const searchRegex = { $regex: q, $options: "i" };
+        let results = { matches: [], players: [], openings: [] };
+        
+        if (type === "all" || type === "matches") {
+            const matches = await Game.find({
+                $or: [
+                    { moves: searchRegex },
+                    { "white.username": searchRegex },
+                    { "black.username": searchRegex }
+                ],
+                isArchived: false
+            }).limit(parseInt(limit)).sort({ createdAt: -1 });
+            results.matches = matches;
+        }
+        
+        if (type === "all" || type === "players") {
+            const players = await Player.find({ username: searchRegex }).limit(parseInt(limit));
+            results.players = players;
+        }
+        
+        if (type === "all" || type === "openings") {
+            const openings = await Opening.find({ name: searchRegex }).limit(parseInt(limit));
+            results.openings = openings;
+        }
+        
+        // Log search
+        try {
+            await SearchLog.create({ query: q, type: "global", resultsCount: results.matches.length + results.players.length + results.openings.length });
+        } catch(e) {}
+        
+        res.json({ success: true, ...results });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    Autocomplete suggestions
+// @route   GET /api/v1/search/autocomplete
+const getAutocomplete = async (req, res) => {
+    try {
+        const { q } = req.query;
+        
+        if (!q || q.length < 2) {
+            return res.json({ success: true, suggestions: { players: [], openings: [] } });
+        }
+        
+        const searchRegex = { $regex: `^${q}`, $options: "i" };
+        
+        const players = await Player.find({ username: searchRegex }).limit(5).select("username");
+        const openings = await Opening.find({ name: searchRegex }).limit(5).select("name eco");
+        
+        res.json({
+            success: true,
+            suggestions: {
+                players: players.map(p => ({ username: p.username })),
+                openings: openings.map(o => ({ name: o.name, eco: o.eco }))
+            }
         });
     } catch (error) {
-        console.error("Search logging error:", error.message);
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
 // @desc    Search matches
+// @route   GET /api/v1/search/matches
 const searchMatches = async (req, res) => {
     try {
-        const query = req.query.q;
-        if (!query) {
+        const { q, page = 1, limit = 20 } = req.query;
+        
+        if (!q) {
             return res.status(400).json({ success: false, message: "Search query required" });
         }
         
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 20;
-        const skip = (page - 1) * limit;
+        const searchRegex = { $regex: q, $options: "i" };
+        const skip = (parseInt(page) - 1) * parseInt(limit);
         
-        const searchRegex = { $regex: query, $options: "i" };
-        
-        const games = await Game.find({
+        const matches = await Game.find({
             $or: [
                 { moves: searchRegex },
                 { "white.username": searchRegex },
-                { "black.username": searchRegex },
-                { "opening.name": searchRegex }
+                { "black.username": searchRegex }
             ],
             isArchived: false
-        }).skip(skip).limit(limit).sort({ createdAt: -1 });
+        }).skip(skip).limit(parseInt(limit)).sort({ createdAt: -1 });
         
         const total = await Game.countDocuments({
             $or: [
                 { moves: searchRegex },
                 { "white.username": searchRegex },
-                { "black.username": searchRegex },
-                { "opening.name": searchRegex }
+                { "black.username": searchRegex }
             ],
             isArchived: false
         });
         
-        await logSearch(query, "matches", games.length, req);
-        
-        res.json({ success: true, count: games.length, total, page, pages: Math.ceil(total / limit), query, data: games });
+        res.json({ success: true, count: matches.length, total, page: parseInt(page), pages: Math.ceil(total / parseInt(limit)), data: matches });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
 // @desc    Search players
+// @route   GET /api/v1/search/players
 const searchPlayers = async (req, res) => {
     try {
-        const query = req.query.q;
-        if (!query) {
+        const { q, limit = 20 } = req.query;
+        
+        if (!q) {
             return res.status(400).json({ success: false, message: "Search query required" });
         }
         
-        const players = await Player.find({ username: { $regex: query, $options: "i" } }).limit(20);
+        const searchRegex = { $regex: q, $options: "i" };
+        const players = await Player.find({ username: searchRegex }).limit(parseInt(limit));
         
-        await logSearch(query, "players", players.length, req);
-        
-        res.json({ success: true, count: players.length, query, data: players });
+        res.json({ success: true, count: players.length, data: players });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
 // @desc    Search openings
+// @route   GET /api/v1/search/openings
 const searchOpenings = async (req, res) => {
     try {
-        const query = req.query.q;
-        if (!query) {
+        const { q, limit = 20 } = req.query;
+        
+        if (!q) {
             return res.status(400).json({ success: false, message: "Search query required" });
         }
         
-        const openings = await Opening.find({ name: { $regex: query, $options: "i" } }).limit(20);
+        const searchRegex = { $regex: q, $options: "i" };
+        const openings = await Opening.find({ name: searchRegex }).limit(parseInt(limit));
         
-        await logSearch(query, "openings", openings.length, req);
-        
-        res.json({ success: true, count: openings.length, query, data: openings });
+        res.json({ success: true, count: openings.length, data: openings });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
 // @desc    Search by ECO code
-const searchEco = async (req, res) => {
+// @route   GET /api/v1/search/eco
+const searchByEco = async (req, res) => {
     try {
-        const query = req.query.q;
-        if (!query) {
+        const { q } = req.query;
+        
+        if (!q) {
             return res.status(400).json({ success: false, message: "ECO code required" });
         }
         
-        const openings = await Opening.find({ eco: { $regex: query, $options: "i" } }).limit(20);
+        const openings = await Opening.find({ eco: { $regex: q, $options: "i" } }).limit(10);
         
-        await logSearch(query, "eco", openings.length, req);
-        
-        res.json({ success: true, count: openings.length, query, data: openings });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
-// @desc    Get recent searches
-const getRecentSearches = async (req, res) => {
-    try {
-        const limit = parseInt(req.query.limit) || 10;
-        const recentSearches = await SearchLog.aggregate([
-            { $group: { _id: "$query", count: { $sum: 1 }, lastSearched: { $max: "$createdAt" } } },
-            { $sort: { lastSearched: -1 } },
-            { $limit: limit },
-            { $project: { query: "$_id", count: 1, lastSearched: 1, _id: 0 } }
-        ]);
-        
-        res.json({ success: true, count: recentSearches.length, data: recentSearches });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
-// @desc    Get popular searches
-const getPopularSearches = async (req, res) => {
-    try {
-        const limit = parseInt(req.query.limit) || 10;
-        const popularSearches = await SearchLog.aggregate([
-            { $group: { _id: "$query", count: { $sum: 1 } } },
-            { $sort: { count: -1 } },
-            { $limit: limit },
-            { $project: { query: "$_id", count: 1, _id: 0 } }
-        ]);
-        
-        res.json({ success: true, count: popularSearches.length, data: popularSearches });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
-// @desc    Advanced search with multiple filters
-const advancedSearch = async (req, res) => {
-    try {
-        const { q, type, minRating, maxRating, startDate, endDate, winner, page = 1, limit = 20 } = req.query;
-        
-        let filter = { isArchived: false };
-        
-        if (q) {
-            const searchRegex = { $regex: q, $options: "i" };
-            filter.$or = [
-                { moves: searchRegex },
-                { "white.username": searchRegex },
-                { "black.username": searchRegex },
-                { "opening.name": searchRegex }
-            ];
-        }
-        
-        if (winner && winner !== "any") filter.winner = winner;
-        if (minRating) filter["white.rating"] = { $gte: parseInt(minRating) };
-        if (maxRating) filter["black.rating"] = { $lte: parseInt(maxRating) };
-        if (startDate) filter.createdAt = { $gte: new Date(startDate) };
-        if (endDate) filter.createdAt = { ...filter.createdAt, $lte: new Date(endDate) };
-        
-        const skip = (parseInt(page) - 1) * parseInt(limit);
-        const games = await Game.find(filter).skip(skip).limit(parseInt(limit)).sort({ createdAt: -1 });
-        const total = await Game.countDocuments(filter);
-        
-        await logSearch(q || "advanced", "general", games.length, req);
-        
-        res.json({ success: true, count: games.length, total, page: parseInt(page), pages: Math.ceil(total / parseInt(limit)), filters: req.query, data: games });
+        res.json({ success: true, count: openings.length, data: openings });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
 module.exports = {
+    globalSearch,
+    getAutocomplete,
     searchMatches,
     searchPlayers,
     searchOpenings,
-    searchEco,
-    getRecentSearches,
-    getPopularSearches,
-    advancedSearch
+    searchByEco
 };

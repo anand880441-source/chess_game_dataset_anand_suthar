@@ -41,7 +41,7 @@ app.use("/api/v1/matches", gameRoutes);
 app.use("/api/v1/players", playerRoutes);
 app.use("/api/v1/openings", openingRoutes);
 app.use("/api/v1/search", searchRoutes);
-app.use("/api/v1", analyticsRoutes);
+app.use("/api/v1/analytics", analyticsRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/admin", adminRoutes);
 
