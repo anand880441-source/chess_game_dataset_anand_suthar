@@ -9,6 +9,7 @@ import MainLayout from './layouts/MainLayout';
 // Lazy load pages
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Players = lazy(() => import('./pages/Players'));
+const PlayerDetail = lazy(() => import('./pages/PlayerDetail'));
 const Matches = lazy(() => import('./pages/Matches'));
 const MatchDetail = lazy(() => import('./pages/MatchDetail'));
 const Openings = lazy(() => import('./pages/Openings'));
@@ -55,6 +56,15 @@ function App() {
                         <MainLayout>
                             <Suspense fallback={<LoadingSpinner />}>
                                 <Players />
+                            </Suspense>
+                        </MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/players/:username" element={
+                    <ProtectedRoute>
+                        <MainLayout>
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <PlayerDetail />
                             </Suspense>
                         </MainLayout>
                     </ProtectedRoute>
