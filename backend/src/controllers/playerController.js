@@ -2,89 +2,52 @@
 const Game = require("../models/Game");
 
 // @desc    Get all players with pagination
-// @route   GET /api/v1/players
 const getAllPlayers = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 20;
         const skip = (page - 1) * limit;
         
-        const players = await Player.find()
-            .sort({ totalGames: -1 })
-            .skip(skip)
-            .limit(limit);
+        let sort = {};
+        if (req.query.sort) {
+            const sortField = req.query.sort.startsWith("-") ? req.query.sort.substring(1) : req.query.sort;
+            const sortOrder = req.query.sort.startsWith("-") ? -1 : 1;
+            sort[sortField] = sortOrder;
+        } else {
+            sort = { currentRating: -1 };
+        }
         
+        const players = await Player.find().sort(sort).skip(skip).limit(limit);
         const total = await Player.countDocuments();
         
-        res.json({
-            success: true,
-            count: players.length,
-            total,
-            page,
-            pages: Math.ceil(total / limit),
-            data: players
-        });
+        const playersWithRates = players.map(player => ({
+            ...player.toObject(),
+            winRate: player.winRate,
+            lossRate: player.lossRate,
+            drawRate: player.drawRate
+        }));
+        
+        res.json({ success: true, count: players.length, total, page, pages: Math.ceil(total / limit), data: playersWithRates });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// @desc    Get player details by username
-// @route   GET /api/v1/players/:username
+// @desc    Get player by username
 const getPlayerByUsername = async (req, res) => {
     try {
         const player = await Player.findOne({ username: req.params.username });
         if (!player) {
             return res.status(404).json({ success: false, message: "Player not found" });
         }
+        
         res.json({ success: true, data: player });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// @desc    Get player match history
-// @route   GET /api/v1/players/:username/history
-const getPlayerHistory = async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const skip = (page - 1) * limit;
-        
-        const games = await Game.find({
-            $or: [
-                { "white.username": req.params.username },
-                { "black.username": req.params.username }
-            ],
-            isArchived: false
-        })
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit);
-        
-        const total = await Game.countDocuments({
-            $or: [
-                { "white.username": req.params.username },
-                { "black.username": req.params.username }
-            ],
-            isArchived: false
-        });
-        
-        res.json({
-            success: true,
-            count: games.length,
-            total,
-            page,
-            pages: Math.ceil(total / limit),
-            data: games
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
 // @desc    Get player statistics
-// @route   GET /api/v1/players/:username/stats
 const getPlayerStats = async (req, res) => {
     try {
         const player = await Player.findOne({ username: req.params.username });
@@ -112,40 +75,62 @@ const getPlayerStats = async (req, res) => {
     }
 };
 
-// @desc    Get player opening usage
-// @route   GET /api/v1/players/:username/openings
-const getPlayerOpenings = async (req, res) => {
+// @desc    Get player history - FIXED
+const getPlayerHistory = async (req, res) => {
     try {
-        const player = await Player.findOne({ username: req.params.username });
-        if (!player) {
-            return res.status(404).json({ success: false, message: "Player not found" });
-        }
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
         
-        res.json({
-            success: true,
-            username: player.username,
-            openingsUsed: player.openingsUsed.sort((a, b) => b.count - a.count)
+        const games = await Game.find({
+            $or: [
+                { "white.username": req.params.username },
+                { "black.username": req.params.username }
+            ],
+            isArchived: false
+        }).sort({ createdAt: -1 }).skip(skip).limit(limit);
+        
+        // Transform games to show correct result for this player
+        const transformedGames = games.map(game => {
+            const isWhite = game.white.username === req.params.username;
+            let result = 'Loss';
+            
+            if (game.winner === 'draw') {
+                result = 'Draw';
+            } else if (isWhite && game.winner === 'white') {
+                result = 'Win';
+            } else if (!isWhite && game.winner === 'black') {
+                result = 'Win';
+            }
+            
+            return {
+                _id: game._id,
+                gameId: game.gameId,
+                opponent: isWhite ? game.black.username : game.white.username,
+                opponentRating: isWhite ? game.black.rating : game.white.rating,
+                playerColor: isWhite ? 'White' : 'Black',
+                result: result,
+                turns: game.turns,
+                createdAt: game.createdAt,
+                winner: game.winner
+            };
         });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
-// @desc    Get player win percentage
-// @route   GET /api/v1/players/:username/win-rate
-const getPlayerWinRate = async (req, res) => {
-    try {
-        const player = await Player.findOne({ username: req.params.username });
-        if (!player) {
-            return res.status(404).json({ success: false, message: "Player not found" });
-        }
         
-        res.json({
-            success: true,
-            username: player.username,
-            winRate: player.winRate,
-            wins: player.wins,
-            totalGames: player.totalGames
+        const total = await Game.countDocuments({
+            $or: [
+                { "white.username": req.params.username },
+                { "black.username": req.params.username }
+            ],
+            isArchived: false
+        });
+        
+        res.json({ 
+            success: true, 
+            count: games.length, 
+            total, 
+            page, 
+            pages: Math.ceil(total / limit), 
+            data: transformedGames 
         });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -153,44 +138,32 @@ const getPlayerWinRate = async (req, res) => {
 };
 
 // @desc    Get top rated players
-// @route   GET /api/v1/players/top-rated
 const getTopRatedPlayers = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 10;
-        const players = await Player.find()
-            .sort({ currentRating: -1 })
-            .limit(limit);
-        
+        const players = await Player.find().sort({ currentRating: -1 }).limit(limit);
         res.json({ success: true, count: players.length, data: players });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// @desc    Get most active players
-// @route   GET /api/v1/players/top-active
+// @desc    Get top active players
 const getTopActivePlayers = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 10;
-        const players = await Player.find()
-            .sort({ totalGames: -1 })
-            .limit(limit);
-        
+        const players = await Player.find().sort({ totalGames: -1 }).limit(limit);
         res.json({ success: true, count: players.length, data: players });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// @desc    Get highest winning players
-// @route   GET /api/v1/players/top-winning
+// @desc    Get top winning players
 const getTopWinningPlayers = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 10;
-        const players = await Player.find()
-            .sort({ wins: -1 })
-            .limit(limit);
-        
+        const players = await Player.find().sort({ wins: -1 }).limit(limit);
         res.json({ success: true, count: players.length, data: players });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -198,7 +171,6 @@ const getTopWinningPlayers = async (req, res) => {
 };
 
 // @desc    Compare two players
-// @route   GET /api/v1/players/compare/:player1/:player2
 const comparePlayers = async (req, res) => {
     try {
         const player1 = await Player.findOne({ username: req.params.player1 });
@@ -232,29 +204,18 @@ const comparePlayers = async (req, res) => {
 };
 
 // @desc    Filter players by rating range
-// @route   GET /api/v1/players/rating-range?min=1200&max=2000
 const getPlayersByRatingRange = async (req, res) => {
     try {
         const min = parseInt(req.query.min) || 0;
         const max = parseInt(req.query.max) || 3000;
-        
-        const players = await Player.find({
-            currentRating: { $gte: min, $lte: max }
-        }).sort({ currentRating: -1 });
-        
-        res.json({
-            success: true,
-            count: players.length,
-            data: players,
-            range: { min, max }
-        });
+        const players = await Player.find({ currentRating: { $gte: min, $lte: max } }).sort({ currentRating: -1 });
+        res.json({ success: true, count: players.length, data: players, range: { min, max } });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
 // @desc    Get recent matches of a player
-// @route   GET /api/v1/players/:username/recent
 const getPlayerRecentMatches = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 5;
@@ -263,11 +224,54 @@ const getPlayerRecentMatches = async (req, res) => {
                 { "white.username": req.params.username },
                 { "black.username": req.params.username }
             ]
-        })
-        .sort({ createdAt: -1 })
-        .limit(limit);
+        }).sort({ createdAt: -1 }).limit(limit);
         
         res.json({ success: true, count: games.length, data: games });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    Get player openings usage
+const getPlayerOpenings = async (req, res) => {
+    try {
+        const player = await Player.findOne({ username: req.params.username });
+        if (!player) {
+            return res.status(404).json({ success: false, message: "Player not found" });
+        }
+        res.json({ success: true, username: player.username, openingsUsed: player.openingsUsed });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    Get player rating history
+const getPlayerRatingHistory = async (req, res) => {
+    try {
+        const player = await Player.findOne({ username: req.params.username });
+        if (!player) {
+            return res.status(404).json({ success: false, message: "Player not found" });
+        }
+        
+        const games = await Game.find({
+            $or: [
+                { "white.username": req.params.username },
+                { "black.username": req.params.username }
+            ]
+        }).sort({ createdAt: 1 }).select("white.username white.rating black.username black.rating createdAt winner");
+        
+        const ratingHistory = [];
+        for (const game of games) {
+            const isWhite = game.white.username === req.params.username;
+            ratingHistory.push({
+                date: game.createdAt,
+                rating: isWhite ? game.white.rating : game.black.rating,
+                opponent: isWhite ? game.black.username : game.white.username,
+                result: game.winner === req.params.username ? "win" : game.winner === "draw" ? "draw" : "loss"
+            });
+        }
+        
+        res.json({ success: true, username: req.params.username, currentRating: player.currentRating, ratingHistory });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -279,11 +283,11 @@ module.exports = {
     getPlayerHistory,
     getPlayerStats,
     getPlayerOpenings,
-    getPlayerWinRate,
     getTopRatedPlayers,
     getTopActivePlayers,
     getTopWinningPlayers,
     comparePlayers,
     getPlayersByRatingRange,
-    getPlayerRecentMatches
+    getPlayerRecentMatches,
+    getPlayerRatingHistory
 };
