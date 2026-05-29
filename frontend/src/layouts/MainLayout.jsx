@@ -13,6 +13,7 @@ const icons = {
     matches: '♟️',
     openings: '📚',
     analytics: '📈',
+    compare: '🔄',
     profile: '👤',
     settings: '⚙️',
     logout: '🚪',
@@ -28,6 +29,7 @@ const navItems = [
     { path: '/matches', name: 'Matches', icon: icons.matches },
     { path: '/openings', name: 'Openings', icon: icons.openings },
     { path: '/analytics', name: 'Analytics', icon: icons.analytics },
+    { path: '/compare', name: 'Compare', icon: icons.compare },
     { path: '/profile', name: 'Profile', icon: icons.profile },
     { path: '/settings', name: 'Settings', icon: icons.settings },
 ];
