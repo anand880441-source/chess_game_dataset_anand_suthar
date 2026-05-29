@@ -17,6 +17,7 @@ const OpeningDetail = lazy(() => import('./pages/OpeningDetail'));
 const Analytics = lazy(() => import('./pages/Analytics'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Settings = lazy(() => import('./pages/Settings'));
+const ComparePlayers = lazy(() => import('./pages/ComparePlayers'));
 const SearchResults = lazy(() => import('./pages/SearchResults'));
 
 
@@ -126,7 +127,24 @@ function App() {
                         </MainLayout>
                     </ProtectedRoute>
                 } />
-                <Route path="/search" element={<ProtectedRoute><MainLayout><Suspense fallback={<LoadingSpinner />}><SearchResults /></Suspense></MainLayout></ProtectedRoute>} />
+                <Route path="/search" element={
+                    <ProtectedRoute>
+                        <MainLayout>
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <SearchResults />
+                            </Suspense>
+                        </MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/compare" element={
+                    <ProtectedRoute>
+                        <MainLayout>
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <ComparePlayers />
+                            </Suspense>
+                        </MainLayout>
+                    </ProtectedRoute>
+                } />
                 <Route path="/settings" element={
                     <ProtectedRoute>
                         <MainLayout>
