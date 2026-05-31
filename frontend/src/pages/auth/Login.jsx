@@ -4,8 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
-import authService from '../../services/authService.js';
-import { loginStart, loginSuccess, loginFailure } from '../../store/slices/authSlice.js';
+import authService from '../../services/authService';
+import { loginStart, loginSuccess, loginFailure } from '../../store/slices/authSlice';
 
 const loginSchema = Yup.object({
     email: Yup.string().email('Invalid email').required('Email is required'),
@@ -23,19 +23,36 @@ function Login() {
             dispatch(loginStart());
             const response = await authService.login(values);
 
+            console.log('Login response:', response);
+
             if (response.success) {
-                dispatch(loginSuccess({
-                    user: response.user,
-                    accessToken: response.accessToken,
-                    refreshToken: response.refreshToken
-                }));
-                toast.success('Login successful!');
-                navigate('/dashboard');
+                // Make sure token exists
+                const token = response.token || response.accessToken;
+                const userData = response.user;
+
+                console.log('Token to store:', token);
+
+                if (token) {
+                    // Store token in localStorage
+                    localStorage.setItem('accessToken', token);
+                    localStorage.setItem('user', JSON.stringify(userData));
+
+                    dispatch(loginSuccess({
+                        user: userData,
+                        accessToken: token,
+                    }));
+
+                    toast.success('Login successful!');
+                    navigate('/dashboard');
+                } else {
+                    toast.error('No token received from server');
+                }
             } else {
                 dispatch(loginFailure(response.message));
                 toast.error(response.message || 'Login failed');
             }
         } catch (error) {
+            console.error('Login error:', error);
             const message = error.response?.data?.message || 'Login failed. Please try again.';
             dispatch(loginFailure(message));
             toast.error(message);

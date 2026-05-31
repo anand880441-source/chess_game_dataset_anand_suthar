@@ -19,6 +19,7 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Settings = lazy(() => import('./pages/Settings'));
 const ComparePlayers = lazy(() => import('./pages/ComparePlayers'));
 const SearchResults = lazy(() => import('./pages/SearchResults'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
 
 // Loading component
@@ -141,6 +142,15 @@ function App() {
                         <MainLayout>
                             <Suspense fallback={<LoadingSpinner />}>
                                 <ComparePlayers />
+                            </Suspense>
+                        </MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/admin" element={
+                    <ProtectedRoute adminOnly={true}>
+                        <MainLayout>
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <AdminDashboard />
                             </Suspense>
                         </MainLayout>
                     </ProtectedRoute>
