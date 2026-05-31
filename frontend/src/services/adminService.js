@@ -1,7 +1,7 @@
 ﻿import api from './api';
 
 const adminService = {
-    // User Management
+    // User Management (requires admin token)
     getAllUsers: async () => {
         const response = await api.get('/admin/users');
         return response.data;
@@ -17,12 +17,13 @@ const adminService = {
         return response.data;
     },
     
-    // System Health
+    // System Health (requires admin token)
     getSystemHealth: async () => {
         const response = await api.get('/admin/system/health');
         return response.data;
     },
     
+    // Public endpoints (no token needed)
     getSystemInfo: async () => {
         const response = await api.get('/admin/system/info');
         return response.data;
@@ -48,7 +49,6 @@ const adminService = {
         return response.data;
     },
     
-    // Cache Management
     clearCache: async () => {
         const response = await api.delete('/admin/cache/clear');
         return response.data;
@@ -59,7 +59,6 @@ const adminService = {
         return response.data;
     },
     
-    // Recalculate Stats
     recalculateStats: async () => {
         const response = await api.post('/admin/system/recalculate-stats');
         return response.data;

@@ -51,7 +51,7 @@ const getSystemHealth = async (req, res) => {
             success: true,
             data: {
                 database: { games: gameCount, players: playerCount, openings: openingCount, users: userCount, searches: searchCount },
-                server: { uptime: process.uptime(), memory: process.memoryUsage(), nodeVersion: process.version, platform: os.platform() },
+                server: { uptime: process.uptime(), memory: process.memoryUsage(), nodeVersion: process.version, platform: os.platform(), cpus: os.cpus().length },
                 timestamp: new Date()
             }
         });
@@ -79,7 +79,9 @@ const getSystemInfo = async (req, res) => {
 const getSystemStatus = async (req, res) => {
     let dbStatus = "disconnected";
     try {
-        dbStatus = mongoose.connection.readyState === 1 ? "connected" : "disconnected";
+        if (mongoose.connection && mongoose.connection.readyState === 1) {
+            dbStatus = "connected";
+        }
     } catch (e) {
         dbStatus = "unknown";
     }
@@ -125,16 +127,20 @@ const getSystemPerformance = async (req, res) => {
 
 const getSystemStorage = async (req, res) => {
     try {
-        const stats = await mongoose.connection.db.stats();
-        res.json({
-            success: true,
-            data: {
-                databaseSize: (stats.dataSize / 1024 / 1024).toFixed(2) + " MB",
-                indexesSize: (stats.indexSize / 1024 / 1024).toFixed(2) + " MB",
-                collections: stats.collections,
-                objects: stats.objects
-            }
-        });
+        if (mongoose.connection && mongoose.connection.db) {
+            const stats = await mongoose.connection.db.stats();
+            res.json({
+                success: true,
+                data: {
+                    databaseSize: (stats.dataSize / 1024 / 1024).toFixed(2) + " MB",
+                    indexesSize: (stats.indexSize / 1024 / 1024).toFixed(2) + " MB",
+                    collections: stats.collections,
+                    objects: stats.objects
+                }
+            });
+        } else {
+            res.json({ success: true, data: { message: "Storage stats not available" } });
+        }
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
