@@ -185,7 +185,7 @@ chess_game_dataset_anand_suthar/
 
 ---
 
-## 📡 API Endpoints (80+)
+## 📡 API Endpoints (147+)
 
 ### 🏥 Health & System
 
