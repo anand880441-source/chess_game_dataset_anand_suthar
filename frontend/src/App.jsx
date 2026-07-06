@@ -1,4 +1,4 @@
-﻿import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Login from './pages/auth/Login';
@@ -22,10 +22,18 @@ const SearchResults = lazy(() => import('./pages/SearchResults'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
 
-// Loading component
+// Chess-themed loading spinner
 const LoadingSpinner = () => (
-    <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="relative">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-400 flex items-center justify-center animate-pulse">
+                <svg className="w-8 h-8 text-white animate-float" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 22H5v-2h14v2M17.16 8.26A8.94 8.94 0 0018 5h-2a7 7 0 01-.59 2.84L12 11.28 8.59 7.84A7 7 0 018 5H6a8.94 8.94 0 00.84 3.26L12 13.43l5.16-5.17M12 2a1 1 0 011 1 1 1 0 01-1 1 1 1 0 01-1-1 1 1 0 011-1M17 20H7l2-8h6l2 8z" />
+                </svg>
+            </div>
+            <div className="absolute inset-0 rounded-2xl bg-primary-500/20 animate-ping"></div>
+        </div>
+        <p className="text-sm text-gray-400 dark:text-gray-500 font-medium">Loading...</p>
     </div>
 );
 
