@@ -1,5 +1,6 @@
 ﻿const mongoose = require('mongoose');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
 async function makeAdmin() {
     try {
@@ -7,7 +8,7 @@ async function makeAdmin() {
         console.log('Connected to MongoDB');
 
         // CHANGE THIS EMAIL TO YOUR LOGIN EMAIL
-        const email = 'example123@example.com';  // <--- CHANGE THIS LINE
+        const email = 'anand880441@gmail.com';  // <--- CHANGE THIS LINE
 
         const db = mongoose.connection.db;
         const usersCollection = db.collection('users');

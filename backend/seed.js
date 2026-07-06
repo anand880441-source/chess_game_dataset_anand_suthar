@@ -1,7 +1,7 @@
 ﻿const mongoose = require("mongoose");
 const fs = require("fs");
 const path = require("path");
-require("dotenv").config();
+require("dotenv").config({ path: path.resolve(__dirname, '.env') });
 
 // Import models
 const Game = require("./src/models/Game");
