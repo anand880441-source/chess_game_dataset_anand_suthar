@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
@@ -9,7 +9,7 @@ import { loginSuccess } from '../../store/slices/authSlice';
 
 const registerSchema = Yup.object({
     name: Yup.string().min(2, 'Name must be at least 2 characters').required('Name is required'),
-    email: Yup.string().email('Invalid email').required('Email is required'),
+    email: Yup.string().email('Invalid email address').required('Email is required'),
     password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
     confirmPassword: Yup.string()
         .oneOf([Yup.ref('password'), null], 'Passwords must match')
@@ -32,7 +32,7 @@ function Register() {
                     user: response.user,
                     accessToken: response.token,
                 }));
-                toast.success('Registration successful!');
+                toast.success('Welcome! Registration successful.');
                 navigate('/dashboard');
             } else {
                 toast.error(response.message || 'Registration failed');
@@ -46,138 +46,174 @@ function Register() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8">
-                <div className="text-center">
-                    <div className="mx-auto h-16 w-16 bg-primary-600 rounded-2xl flex items-center justify-center">
-                        <span className="text-3xl">♟️</span>
+        <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+            {/* Animated Chess background elements */}
+            <div className="absolute top-1/10 right-1/10 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl animate-float stagger-2"></div>
+            <div className="absolute bottom-1/10 left-1/10 w-96 h-96 bg-accent-500/10 rounded-full blur-3xl animate-float"></div>
+            
+            {/* Decorative background Chess icons */}
+            <div className="absolute -right-10 top-1/4 text-white/5 text-9xl font-extrabold select-none pointer-events-none transform rotate-12 animate-float">
+                ♞
+            </div>
+            <div className="absolute -left-10 bottom-1/4 text-white/5 text-9xl font-extrabold select-none pointer-events-none transform -rotate-12 animate-float stagger-3">
+                👑
+            </div>
+
+            <div className="max-w-md w-full relative z-10">
+                {/* Brand header */}
+                <div className="text-center mb-8 animate-fade-in">
+                    <div className="mx-auto h-16 w-16 bg-gradient-to-br from-primary-600 to-primary-400 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30 animate-pulse-glow">
+                        <svg className="w-9 h-9 text-white" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 22H5v-2h14v2M17.16 8.26A8.94 8.94 0 0018 5h-2a7 7 0 01-.59 2.84L12 11.28 8.59 7.84A7 7 0 018 5H6a8.94 8.94 0 00.84 3.26L12 13.43l5.16-5.17M12 2a1 1 0 011 1 1 1 0 01-1 1 1 1 0 01-1-1 1 1 0 011-1M17 20H7l2-8h6l2 8z" />
+                        </svg>
                     </div>
-                    <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
+                    <h2 className="mt-6 text-3xl font-extrabold text-white tracking-tight">
                         Create Account
                     </h2>
-                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Join Chess Match Analytics
+                    <p className="mt-2 text-sm text-gray-400">
+                        Join Chess Match Analytics Platform
                     </p>
                 </div>
 
-                <Formik
-                    initialValues={{ name: '', email: '', password: '', confirmPassword: '' }}
-                    validationSchema={registerSchema}
-                    onSubmit={handleSubmit}
-                >
-                    {({ errors, touched, isSubmitting }) => (
-                        <Form className="mt-8 space-y-6">
-                            <div className="rounded-md shadow-sm space-y-4">
-                                <div>
-                                    <label htmlFor="name" className="label">
-                                        Full Name
-                                    </label>
-                                    <Field
-                                        id="name"
-                                        name="name"
-                                        type="text"
-                                        autoComplete="name"
-                                        className={`input ${errors.name && touched.name ? 'border-red-500' : ''}`}
-                                        placeholder="John Doe"
-                                    />
-                                    {errors.name && touched.name && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-                                    )}
-                                </div>
+                {/* Glass Card */}
+                <div className="card-glass border border-white/10 shadow-glass-dark py-8 px-6 sm:px-10 rounded-3xl animate-slide-up">
+                    <h3 className="text-xl font-bold text-white mb-6 text-center">Sign Up</h3>
 
-                                <div>
-                                    <label htmlFor="email" className="label">
-                                        Email Address
-                                    </label>
-                                    <Field
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        autoComplete="email"
-                                        className={`input ${errors.email && touched.email ? 'border-red-500' : ''}`}
-                                        placeholder="user@example.com"
-                                    />
-                                    {errors.email && touched.email && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <label htmlFor="password" className="label">
-                                        Password
-                                    </label>
-                                    <div className="relative">
-                                        <Field
-                                            id="password"
-                                            name="password"
-                                            type={showPassword ? 'text' : 'password'}
-                                            className={`input ${errors.password && touched.password ? 'border-red-500' : ''}`}
-                                            placeholder="••••••••"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                        >
-                                            {showPassword ? '👁️' : '👁️‍🗨️'}
-                                        </button>
+                    <Formik
+                        initialValues={{ name: '', email: '', password: '', confirmPassword: '' }}
+                        validationSchema={registerSchema}
+                        onSubmit={handleSubmit}
+                    >
+                        {({ errors, touched, isSubmitting }) => (
+                            <Form className="space-y-5">
+                                <div className="space-y-4">
+                                    <div>
+                                        <label htmlFor="name" className="block text-xs font-semibold text-gray-300 mb-1.5 uppercase tracking-wider">
+                                            Full Name
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500">
+                                                👤
+                                            </span>
+                                            <Field
+                                                id="name"
+                                                name="name"
+                                                type="text"
+                                                autoComplete="name"
+                                                className={`input pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:bg-white/10 ${errors.name && touched.name ? 'border-red-500 focus:ring-red-500/20' : 'focus:ring-primary-500/20'}`}
+                                                placeholder="John Doe"
+                                            />
+                                        </div>
+                                        {errors.name && touched.name && (
+                                            <p className="mt-1 text-xs text-red-400 font-medium">{errors.name}</p>
+                                        )}
                                     </div>
-                                    {errors.password && touched.password && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                                    )}
-                                </div>
 
-                                <div>
-                                    <label htmlFor="confirmPassword" className="label">
-                                        Confirm Password
-                                    </label>
-                                    <div className="relative">
-                                        <Field
-                                            id="confirmPassword"
-                                            name="confirmPassword"
-                                            type={showConfirmPassword ? 'text' : 'password'}
-                                            className={`input ${errors.confirmPassword && touched.confirmPassword ? 'border-red-500' : ''}`}
-                                            placeholder="••••••••"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                        >
-                                            {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
-                                        </button>
+                                    <div>
+                                        <label htmlFor="email" className="block text-xs font-semibold text-gray-300 mb-1.5 uppercase tracking-wider">
+                                            Email Address
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500">
+                                                ✉️
+                                            </span>
+                                            <Field
+                                                id="email"
+                                                name="email"
+                                                type="email"
+                                                autoComplete="email"
+                                                className={`input pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:bg-white/10 ${errors.email && touched.email ? 'border-red-500 focus:ring-red-500/20' : 'focus:ring-primary-500/20'}`}
+                                                placeholder="username@domain.com"
+                                            />
+                                        </div>
+                                        {errors.email && touched.email && (
+                                            <p className="mt-1 text-xs text-red-400 font-medium">{errors.email}</p>
+                                        )}
                                     </div>
-                                    {errors.confirmPassword && touched.confirmPassword && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
-                                    )}
+
+                                    <div>
+                                        <label htmlFor="password" className="block text-xs font-semibold text-gray-300 mb-1.5 uppercase tracking-wider">
+                                            Password
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500">
+                                                🔒
+                                            </span>
+                                            <Field
+                                                id="password"
+                                                name="password"
+                                                type={showPassword ? 'text' : 'password'}
+                                                className={`input pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:bg-white/10 ${errors.password && touched.password ? 'border-red-500 focus:ring-red-500/20' : 'focus:ring-primary-500/20'}`}
+                                                placeholder="••••••••"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-200 transition-colors"
+                                            >
+                                                {showPassword ? '👁️' : '👁️‍🗨️'}
+                                            </button>
+                                        </div>
+                                        {errors.password && touched.password && (
+                                            <p className="mt-1 text-xs text-red-400 font-medium">{errors.password}</p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="confirmPassword" className="block text-xs font-semibold text-gray-300 mb-1.5 uppercase tracking-wider">
+                                            Confirm Password
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500">
+                                                🔒
+                                            </span>
+                                            <Field
+                                                id="confirmPassword"
+                                                name="confirmPassword"
+                                                type={showConfirmPassword ? 'text' : 'password'}
+                                                className={`input pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:bg-white/10 ${errors.confirmPassword && touched.confirmPassword ? 'border-red-500 focus:ring-red-500/20' : 'focus:ring-primary-500/20'}`}
+                                                placeholder="••••••••"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-200 transition-colors"
+                                            >
+                                                {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                                            </button>
+                                        </div>
+                                        {errors.confirmPassword && touched.confirmPassword && (
+                                            <p className="mt-1 text-xs text-red-400 font-medium">{errors.confirmPassword}</p>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div>
-                                <button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className="btn-primary w-full flex justify-center"
-                                >
-                                    {isSubmitting ? (
-                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                    ) : (
-                                        'Sign up'
-                                    )}
-                                </button>
-                            </div>
+                                <div className="pt-2">
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="btn-primary w-full flex justify-center py-3 rounded-2xl font-bold tracking-wide"
+                                    >
+                                        {isSubmitting ? (
+                                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        ) : (
+                                            'Sign Up for Account'
+                                        )}
+                                    </button>
+                                </div>
 
-                            <div className="text-center">
-                                <Link to="/login" className="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400">
-                                    Already have an account? Sign in
-                                </Link>
-                            </div>
-                        </Form>
-                    )}
-                </Formik>
+                                <div className="text-center pt-2">
+                                    <Link to="/login" className="text-sm font-semibold text-primary-400 hover:text-primary-300 transition-colors">
+                                        Already have an account? Sign in
+                                    </Link>
+                                </div>
+                            </Form>
+                        )}
+                    </Formik>
+                </div>
             </div>
         </div>
     );

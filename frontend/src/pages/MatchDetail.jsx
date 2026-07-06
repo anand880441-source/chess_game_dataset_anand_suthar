@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
@@ -148,7 +148,7 @@ function MatchDetail() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left Column - Chess Board */}
                     <div className="lg:col-span-2 space-y-6">
-                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-card border border-gray-100 dark:border-gray-800 p-6">
                             <ChessBoardViewer 
                                 moves={moves}
                                 fen={fen}
@@ -157,32 +157,32 @@ function MatchDetail() {
                         </div>
 
                         {/* Tabs */}
-                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                            <div className="border-b border-gray-200 dark:border-gray-700">
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-card border border-gray-100 dark:border-gray-800 overflow-hidden">
+                            <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-slate-900/50">
                                 <div className="flex">
                                     <button
                                         onClick={() => setActiveTab('moves')}
-                                        className={`px-4 py-3 text-sm font-medium transition-colors ${
+                                        className={`px-6 py-4 text-sm font-semibold transition-colors border-b-2 ${
                                             activeTab === 'moves'
-                                                ? 'text-primary-600 border-b-2 border-primary-600'
-                                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                                ? 'text-primary-600 border-primary-600 dark:text-primary-400 dark:border-primary-400'
+                                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white border-transparent'
                                         }`}
                                     >
                                         Move List
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('pgn')}
-                                        className={`px-4 py-3 text-sm font-medium transition-colors ${
+                                        className={`px-6 py-4 text-sm font-semibold transition-colors border-b-2 ${
                                             activeTab === 'pgn'
-                                                ? 'text-primary-600 border-b-2 border-primary-600'
-                                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                                ? 'text-primary-600 border-primary-600 dark:text-primary-400 dark:border-primary-400'
+                                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white border-transparent'
                                         }`}
                                     >
                                         PGN
                                     </button>
                                 </div>
                             </div>
-                            <div className="p-4">
+                            <div className="p-6">
                                 {activeTab === 'moves' && (
                                     <MoveList 
                                         moves={moves}
@@ -200,44 +200,44 @@ function MatchDetail() {
                     {/* Right Column - Analysis */}
                     <div className="space-y-6">
                         {/* Match Info Card */}
-                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-card border border-gray-100 dark:border-gray-800 p-6">
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
                                 Match Information
                             </h2>
-                            <div className="space-y-3">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500 dark:text-gray-400">White Player:</span>
-                                    <Link to={`/players/${match.white?.username}`} className="font-medium text-primary-600 hover:underline">
+                            <div className="space-y-3.5">
+                                <div className="flex justify-between text-sm py-0.5">
+                                    <span className="text-gray-500 dark:text-gray-400 font-semibold">White Player:</span>
+                                    <Link to={`/players/${match.white?.username}`} className="font-bold text-primary-600 dark:text-primary-400 hover:underline">
                                         {match.white?.username} ({match.white?.rating})
                                     </Link>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500 dark:text-gray-400">Black Player:</span>
-                                    <Link to={`/players/${match.black?.username}`} className="font-medium text-primary-600 hover:underline">
+                                <div className="flex justify-between text-sm py-0.5">
+                                    <span className="text-gray-500 dark:text-gray-400 font-semibold">Black Player:</span>
+                                    <Link to={`/players/${match.black?.username}`} className="font-bold text-primary-600 dark:text-primary-400 hover:underline">
                                         {match.black?.username} ({match.black?.rating})
                                     </Link>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500 dark:text-gray-400">Opening:</span>
-                                    <span className="font-medium text-gray-900 dark:text-white text-right">
+                                <div className="flex justify-between text-sm py-0.5">
+                                    <span className="text-gray-500 dark:text-gray-400 font-semibold">Opening:</span>
+                                    <span className="font-semibold text-gray-950 dark:text-gray-200 text-right max-w-[150px] truncate" title={match.opening?.name}>
                                         {match.opening?.name}
                                     </span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500 dark:text-gray-400">ECO Code:</span>
-                                    <span className="font-mono font-medium text-gray-900 dark:text-white">
+                                <div className="flex justify-between text-sm py-0.5">
+                                    <span className="text-gray-500 dark:text-gray-400 font-semibold">ECO Code:</span>
+                                    <span className="font-mono font-bold text-gray-950 dark:text-gray-200">
                                         {match.opening?.eco}
                                     </span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500 dark:text-gray-400">Time Control:</span>
-                                    <span className="font-medium text-gray-900 dark:text-white">
+                                <div className="flex justify-between text-sm py-0.5">
+                                    <span className="text-gray-500 dark:text-gray-400 font-semibold">Time Control:</span>
+                                    <span className="font-bold text-gray-950 dark:text-gray-200">
                                         {match.incrementCode}
                                     </span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500 dark:text-gray-400">Game Type:</span>
-                                    <span className="font-medium text-gray-900 dark:text-white">
+                                <div className="flex justify-between text-sm py-0.5">
+                                    <span className="text-gray-500 dark:text-gray-400 font-semibold">Game Type:</span>
+                                    <span className="font-bold text-gray-950 dark:text-gray-200">
                                         {match.rated ? 'Rated' : 'Casual'}
                                     </span>
                                 </div>
@@ -245,8 +245,8 @@ function MatchDetail() {
                         </div>
 
                         {/* Analysis Card */}
-                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-card border border-gray-100 dark:border-gray-800 p-6">
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
                                 Game Analysis
                             </h2>
                             <AnalysisPanel 

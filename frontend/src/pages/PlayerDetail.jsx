@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
@@ -152,58 +152,58 @@ function PlayerDetail() {
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center border border-gray-200 dark:border-gray-700">
-                        <p className="text-2xl font-bold text-green-600">{stats?.winRate || player?.winRate || 0}%</p>
-                        <p className="text-sm text-gray-500">Win Rate</p>
-                        <p className="text-xs text-gray-400">{stats?.wins || 0} wins</p>
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 text-center border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
+                        <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats?.winRate || player?.winRate || 0}%</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Win Rate</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{stats?.wins || 0} wins</p>
                     </div>
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center border border-gray-200 dark:border-gray-700">
-                        <p className="text-2xl font-bold text-red-600">{stats?.lossRate || player?.lossRate || 0}%</p>
-                        <p className="text-sm text-gray-500">Loss Rate</p>
-                        <p className="text-xs text-gray-400">{stats?.losses || 0} losses</p>
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 text-center border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
+                        <p className="text-2xl font-bold text-red-600 dark:text-red-400">{stats?.lossRate || player?.lossRate || 0}%</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Loss Rate</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{stats?.losses || 0} losses</p>
                     </div>
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center border border-gray-200 dark:border-gray-700">
-                        <p className="text-2xl font-bold text-yellow-600">{stats?.drawRate || player?.drawRate || 0}%</p>
-                        <p className="text-sm text-gray-500">Draw Rate</p>
-                        <p className="text-xs text-gray-400">{stats?.draws || 0} draws</p>
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 text-center border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
+                        <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats?.drawRate || player?.drawRate || 0}%</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Draw Rate</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{stats?.draws || 0} draws</p>
                     </div>
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center border border-gray-200 dark:border-gray-700">
-                        <p className="text-2xl font-bold text-blue-600">{player.currentRating}</p>
-                        <p className="text-sm text-gray-500">Current Rating</p>
-                        <p className="text-xs text-gray-400">ELO</p>
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 text-center border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
+                        <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{player.currentRating}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Current Rating</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">ELO</p>
                     </div>
                 </div>
 
                 {/* Tabs */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div className="border-b border-gray-200 dark:border-gray-700">
-                        <div className="flex gap-4 px-6">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-card border border-gray-100 dark:border-gray-800 overflow-hidden">
+                    <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-slate-900/50">
+                        <div className="flex gap-6 px-6">
                             <button
                                 onClick={() => setActiveTab('overview')}
-                                className={`py-3 text-sm font-medium transition-colors ${
+                                className={`py-4 text-sm font-semibold transition-colors border-b-2 ${
                                     activeTab === 'overview'
-                                        ? 'text-primary-600 border-b-2 border-primary-600'
-                                        : 'text-gray-500 hover:text-gray-700'
+                                        ? 'text-primary-600 border-primary-600 dark:text-primary-400 dark:border-primary-400'
+                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white border-transparent'
                                 }`}
                             >
                                 Overview
                             </button>
                             <button
                                 onClick={() => setActiveTab('rating-history')}
-                                className={`py-3 text-sm font-medium transition-colors ${
+                                className={`py-4 text-sm font-semibold transition-colors border-b-2 ${
                                     activeTab === 'rating-history'
-                                        ? 'text-primary-600 border-b-2 border-primary-600'
-                                        : 'text-gray-500 hover:text-gray-700'
+                                        ? 'text-primary-600 border-primary-600 dark:text-primary-400 dark:border-primary-400'
+                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white border-transparent'
                                 }`}
                             >
                                 Rating History
                             </button>
                             <button
                                 onClick={() => setActiveTab('matches')}
-                                className={`py-3 text-sm font-medium transition-colors ${
+                                className={`py-4 text-sm font-semibold transition-colors border-b-2 ${
                                     activeTab === 'matches'
-                                        ? 'text-primary-600 border-b-2 border-primary-600'
-                                        : 'text-gray-500 hover:text-gray-700'
+                                        ? 'text-primary-600 border-primary-600 dark:text-primary-400 dark:border-primary-400'
+                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white border-transparent'
                                 }`}
                             >
                                 Recent Matches
@@ -215,23 +215,23 @@ function PlayerDetail() {
                         {activeTab === 'overview' && (
                             <div className="space-y-4">
                                 <div>
-                                    <h3 className="text-lg font-semibold mb-3">Player Statistics</h3>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between py-2 border-b">
-                                            <span className="text-gray-600">Total Games</span>
-                                            <span className="font-semibold">{player.totalGames}</span>
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Player Statistics</h3>
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between py-3 border-b border-gray-100 dark:border-gray-800">
+                                            <span className="text-gray-500 dark:text-gray-400 font-semibold">Total Games</span>
+                                            <span className="font-bold text-gray-800 dark:text-gray-200">{player.totalGames}</span>
                                         </div>
-                                        <div className="flex justify-between py-2 border-b">
-                                            <span className="text-gray-600">Wins / Losses / Draws</span>
-                                            <span className="font-semibold">{stats?.wins || 0} / {stats?.losses || 0} / {stats?.draws || 0}</span>
+                                        <div className="flex justify-between py-3 border-b border-gray-100 dark:border-gray-800">
+                                            <span className="text-gray-500 dark:text-gray-400 font-semibold">Wins / Losses / Draws</span>
+                                            <span className="font-bold text-gray-800 dark:text-gray-200">{stats?.wins || 0} / {stats?.losses || 0} / {stats?.draws || 0}</span>
                                         </div>
-                                        <div className="flex justify-between py-2 border-b">
-                                            <span className="text-gray-600">Last Active</span>
-                                            <span className="font-semibold">{player.lastPlayedAt ? new Date(player.lastPlayedAt).toLocaleDateString() : 'N/A'}</span>
+                                        <div className="flex justify-between py-3 border-b border-gray-100 dark:border-gray-800">
+                                            <span className="text-gray-500 dark:text-gray-400 font-semibold">Last Active</span>
+                                            <span className="font-bold text-gray-800 dark:text-gray-200">{player.lastPlayedAt ? new Date(player.lastPlayedAt).toLocaleDateString() : 'N/A'}</span>
                                         </div>
-                                        <div className="flex justify-between py-2 border-b">
-                                            <span className="text-gray-600">Member Since</span>
-                                            <span className="font-semibold">{new Date(player.createdAt).toLocaleDateString()}</span>
+                                        <div className="flex justify-between py-3 border-b border-gray-100 dark:border-gray-800">
+                                            <span className="text-gray-500 dark:text-gray-400 font-semibold">Member Since</span>
+                                            <span className="font-bold text-gray-800 dark:text-gray-200">{new Date(player.createdAt).toLocaleDateString()}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -243,12 +243,19 @@ function PlayerDetail() {
                                 {ratingHistory.length > 0 ? (
                                     <ResponsiveContainer width="100%" height={400}>
                                         <LineChart data={ratingHistory}>
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="date" />
-                                            <YAxis domain={['auto', 'auto']} />
-                                            <Tooltip />
-                                            <Legend />
-                                            <Line type="monotone" dataKey="rating" stroke="#6366f1" strokeWidth={2} dot={{ r: 4 }} />
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(156, 163, 175, 0.1)" />
+                                            <XAxis dataKey="date" stroke="#9ca3af" fontSize={11} tickLine={false} />
+                                            <YAxis domain={['auto', 'auto']} stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} />
+                                            <Tooltip 
+                                                contentStyle={{
+                                                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                                    border: 'none',
+                                                    borderRadius: '8px',
+                                                    color: '#fff'
+                                                }}
+                                            />
+                                            <Legend verticalAlign="bottom" height={36} />
+                                            <Line type="monotone" dataKey="rating" stroke="#6366f1" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} name="ELO Rating" />
                                         </LineChart>
                                     </ResponsiveContainer>
                                 ) : (
@@ -258,18 +265,18 @@ function PlayerDetail() {
                         )}
 
                         {activeTab === 'matches' && (
-                            <div className="overflow-x-auto">
+                            <div className="overflow-x-auto -mx-6">
                                 {recentMatches.length > 0 ? (
                                     <table className="w-full">
-                                        <thead className="bg-gray-50 dark:bg-gray-700/50">
+                                        <thead className="bg-gray-50/50 dark:bg-slate-900/50 border-b border-gray-100 dark:border-gray-800">
                                             <tr>
-                                                <th className="px-4 py-2 text-left text-xs font-medium">Opponent</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium">Result</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium">Moves</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium">Date</th>
+                                                <th className="table-header text-left">Opponent</th>
+                                                <th className="table-header text-left">Result</th>
+                                                <th className="table-header text-left">Moves</th>
+                                                <th className="table-header text-left">Date</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-200">
+                                        <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                                             {recentMatches.map((match) => {
                                                 let result = 'Loss';
                                                 if (match.result === 'Win' || match.resultForPlayer === 'Win') {
@@ -291,15 +298,15 @@ function PlayerDetail() {
                                                 if (opponent === username) return null;
                                                 
                                                 return (
-                                                    <tr key={match._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                                        <td className="px-4 py-2">
-                                                            <Link to={`/players/${opponent}`} className="text-primary-600 hover:underline">
+                                                    <tr key={match._id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/10 transition-colors">
+                                                        <td className="px-6 py-4.5 whitespace-nowrap text-sm font-semibold">
+                                                            <Link to={`/players/${opponent}`} className="text-primary-600 dark:text-primary-400 hover:underline">
                                                                 {opponent}
                                                             </Link>
                                                          </td>
-                                                        <td className={`px-4 py-2 font-medium ${getResultColor(result)}`}>{result}</td>
-                                                        <td className="px-4 py-2 text-gray-600">{moves}</td>
-                                                        <td className="px-4 py-2 text-gray-500 text-sm">{date}</td>
+                                                        <td className={`px-6 py-4.5 whitespace-nowrap text-sm font-bold ${getResultColor(result)}`}>{result}</td>
+                                                        <td className="px-6 py-4.5 whitespace-nowrap text-sm font-mono text-gray-600 dark:text-gray-300">{moves}</td>
+                                                        <td className="px-6 py-4.5 whitespace-nowrap text-xs text-gray-400 dark:text-gray-500">{date}</td>
                                                      </tr>
                                                 );
                                             })}
